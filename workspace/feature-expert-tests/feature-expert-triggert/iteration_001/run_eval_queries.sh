@@ -67,41 +67,51 @@ if [[ ! "$RUNS" =~ ^[1-9][0-9]*$ ]]; then
 fi
 
 # Checks if OpenCode invoked the specified Skill tool for a given query.
+# Also writes the full NDJSON log to the provided log file.
 check_triggered() {
   local query="$1"
+  local logfile="$2"
 
-  # Stream output through jq using recursive search (..), ensuring both NDJSON
-  # streams and full payload arrays are properly traversed.
-  opencode run "$query" -m "$MODEL" --format json 2>/dev/null \
+  opencode run "$query" -m "$MODEL" --format json 2>/dev/null | tee "$logfile" \
     | jq -e --arg skill "$SKILL_NAME" '
         [
-          ..
-          | objects
-          | select(
-              # Match generic tool call objects targeting "skill"
+          "input":{"name":"feature-expert"} | length > 0
+      ' > /dev/null 2>&1
+}
+
+# Validates that a log file contains evidence of the skill tool being invoked.
+# Matches the same patterns as check_triggered against the saved log.
+validate_log() {
+  local logfile="$1"
+
+  jq -e --arg skill "$SKILL_NAME" '
+      [
+        ..
+        | objects
+        | select(
+            (
+              (.type? == "tool_use" or .type? == "tool_call" or .type? == "call" or .function? != null) and
+              (.name? == "skill" or .name? == "Skill" or .tool? == "skill" or .function?.name? == "skill") and
               (
-                (.type? == "tool_use" or .type? == "tool_call" or .type? == "call" or .function? != null) and
-                (.name? == "skill" or .name? == "Skill" or .tool? == "skill" or .function?.name? == "skill") and
-                (
-                  .input?.skill == $skill or
-                  .args?.skill == $skill or
-                  .parameters?.skill == $skill or
-                  .function?.arguments?.skill == $skill
-                )
-              )
-              or
-              # Match direct skill invocation names (e.g., tool name is directly the skill name)
-              (
-                .name? == $skill or .tool? == $skill or .function?.name? == $skill
+                .input?.skill == $skill or
+                .args?.skill == $skill or
+                .parameters?.skill == $skill or
+                .function?.arguments?.skill == $skill
               )
             )
-        ] | length > 0
-      ' > /dev/null 2>&1
+            or
+            (
+              .name? == $skill or .tool? == $skill or .function?.name? == $skill
+            )
+          )
+      ] | length > 0
+    ' "$logfile" > /dev/null 2>&1
 }
 
 # Setup output directory and filename
 RESULTS_DIR="results"
-mkdir -p "$RESULTS_DIR"
+LOGS_DIR="logs"
+mkdir -p "$RESULTS_DIR" "$LOGS_DIR"
 
 TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
 OUTPUT_FILE="${RESULTS_DIR}/eval_${SKILL_NAME}_${TIMESTAMP}.json"
@@ -111,10 +121,28 @@ count=$(jq length "$QUERIES_FILE")
 eval_results=$(for i in $(seq 0 $((count - 1))); do
   query=$(jq -r ".[$i].query" "$QUERIES_FILE")
   should_trigger=$(jq -r ".[$i].should_trigger" "$QUERIES_FILE")
+  query_id=$(jq -r ".[$i].id // \"q_$i\"" "$QUERIES_FILE")
   triggers=0
+  log_files_json="[]"
 
   for run in $(seq 1 $RUNS); do
-    check_triggered "$query" && triggers=$((triggers + 1))
+    logfile="${LOGS_DIR}/eval_${SKILL_NAME}_${query_id}_run${run}_${TIMESTAMP}.log"
+    if check_triggered "$query" "$logfile"; then
+      triggers=$((triggers + 1))
+    fi
+    log_files_json=$(echo "$log_files_json" | jq --arg path "$logfile" '. + [$path]')
+  done
+
+  # Validate each saved log reflects the skill invocation correctly
+  log_validations="[]"
+  for logfile in $(echo "$log_files_json" | jq -r '.[]'); do
+    if [[ -f "$logfile" ]]; then
+      if validate_log "$logfile"; then
+        log_validations=$(echo "$log_validations" | jq --arg path "$logfile" --argjson valid true '. + [{log: $path, skill_invoked_in_log: $valid}]')
+      else
+        log_validations=$(echo "$log_validations" | jq --arg path "$logfile" --argjson valid false '. + [{log: $path, skill_invoked_in_log: $valid}]')
+      fi
+    fi
   done
 
   jq -n \
@@ -122,15 +150,18 @@ eval_results=$(for i in $(seq 0 $((count - 1))); do
     --argjson should_trigger "$should_trigger" \
     --argjson triggers "$triggers" \
     --argjson runs "$RUNS" \
+    --argjson log_validations "$log_validations" \
     '{
       query: $query,
       should_trigger: $should_trigger,
       triggers: $triggers,
       runs: $runs,
-      trigger_rate: ($triggers / $runs)
+      trigger_rate: ($triggers / $runs),
+      log_validations: $log_validations
     }'
 done | jq -s '.')
 
 # Save to results folder and display on stdout
 echo "$eval_results" | tee "$OUTPUT_FILE"
 echo -e "\n[+] Evaluation completed. Results saved to: $OUTPUT_FILE" >&2
+echo -e "[+] Raw logs saved to: $LOGS_DIR/" >&2
