@@ -1,0 +1,14 @@
+=== RUN METADATA ===
+ID: 5
+Timestamp: 2026-07-22T14:37:47-05:00
+Query: Link feature 'Payments' to PRD prd_0002
+Model: digitalocean/deepseek-4-flash
+Run: 1/1
+Expected Trigger: true
+Timeout: 1m0s
+====================
+
+[0m
+> build · deepseek-4-flash
+[0m
+[0m→ [0mSkill "feature-expert"
