@@ -1,0 +1,9 @@
+[
+  {
+    "query": "Initialize the FEATURES.yml file for this project",
+    "should_trigger": true,
+    "triggers": false,
+    "runs": 1,
+    "trigger_rate": 0
+  }
+]
