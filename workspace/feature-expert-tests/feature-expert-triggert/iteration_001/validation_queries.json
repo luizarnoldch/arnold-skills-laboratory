@@ -1,0 +1,34 @@
+[
+  {
+    "query": "Add a new feature called 'User Authentication' to FEATURES.yml",
+    "should_trigger": true
+  },
+  {
+    "query": "Change the sprint of feature 'Dashboard' to Sprint 3",
+    "should_trigger": true
+  },
+  {
+    "query": "Move feature 'Legacy Import' to spec/archive/FEATURES.yml",
+    "should_trigger": true
+  },
+  {
+    "query": "Set sprint_start to 2026-08-01 and sprint_end to 2026-08-14 in FEATURES.yml",
+    "should_trigger": true
+  },
+  {
+    "query": "Show me the content of spec/features/prd_0001/index.md",
+    "should_trigger": false
+  },
+  {
+    "query": "What decisions were made in adr_0003?",
+    "should_trigger": false
+  },
+  {
+    "query": "Create a new branch for the payment feature",
+    "should_trigger": false
+  },
+  {
+    "query": "List all markdown files in the project",
+    "should_trigger": false
+  }
+]

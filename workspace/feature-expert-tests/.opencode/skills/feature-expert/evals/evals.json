@@ -1,0 +1,13 @@
+{
+  "skill_name": "feature-expert",
+  "evals": [
+    {
+      "id": 1,
+      "name": "",
+      "prompt": "",
+      "expected_output": "",
+      "files": [""],
+      "assertions": []
+    }
+  ]
+}

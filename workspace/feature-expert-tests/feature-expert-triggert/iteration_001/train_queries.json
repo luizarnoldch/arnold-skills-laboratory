@@ -1,0 +1,50 @@
+[
+  {
+    "query": "Initialize the FEATURES.yml file for this project",
+    "should_trigger": true
+  },
+  {
+    "query": "Update feature 'Login' — it is now blocked by 'Database Setup'",
+    "should_trigger": true
+  },
+  {
+    "query": "Archive the completed feature 'User Registration'",
+    "should_trigger": true
+  },
+  {
+    "query": "What features do we currently have tracked?",
+    "should_trigger": true
+  },
+  {
+    "query": "Link feature 'Payments' to PRD prd_0002",
+    "should_trigger": true
+  },
+  {
+    "query": "I need to track our features. Can you help set that up?",
+    "should_trigger": true
+  },
+  {
+    "query": "Create a new PRD for the authentication feature",
+    "should_trigger": false
+  },
+  {
+    "query": "Write an ADR for our database choice",
+    "should_trigger": false
+  },
+  {
+    "query": "Add a new REST endpoint for user login",
+    "should_trigger": false
+  },
+  {
+    "query": "Set up a CI/CD pipeline",
+    "should_trigger": false
+  },
+  {
+    "query": "Install the latest version of express",
+    "should_trigger": false
+  },
+  {
+    "query": "Explain the overall project architecture",
+    "should_trigger": false
+  }
+]
