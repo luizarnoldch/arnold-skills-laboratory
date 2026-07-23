@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"flag"
 	"fmt"
 	"io"
 	"log"
@@ -17,13 +18,13 @@ import (
 )
 
 const (
-	model       = "digitalocean/deepseek-4-flash"
-	runsDefault = 1
-	skillName   = "feature-expert"
-	inputFile   = "train_queries.json"
-	outputFile  = "results/train_results.json"
-	logBaseDir  = "log"
-	runTimeout  = 1 * time.Minute
+	defaultModel   = "digitalocean/deepseek-4-flash"
+	defaultRuns    = 1
+	defaultTimeout = 60
+	skillName      = "feature-expert"
+	inputFile      = "train_queries.json"
+	outputFile     = "results/train_results.json"
+	logBaseDir     = "log"
 )
 
 type QueryItem struct {
@@ -37,7 +38,7 @@ type ResultItem struct {
 	ID            int     `json:"id"`
 	Query         string  `json:"query"`
 	ShouldTrigger bool    `json:"should_trigger"`
-	Triggers      bool    `json:"triggers"`
+	Triggers      int     `json:"triggers"` // Updated from bool to int count
 	Runs          int     `json:"runs"`
 	TriggerRate   float64 `json:"trigger_rate"`
 }
@@ -78,6 +79,17 @@ func getNextRunDir(baseDir string) (string, error) {
 }
 
 func main() {
+	// Define command-line flags
+	runsFlag := flag.Int("r", defaultRuns, "Default number of runs per query")
+	modelFlag := flag.String("m", defaultModel, "Model to evaluate")
+	timeoutFlag := flag.Int("s", defaultTimeout, "Timeout per run in seconds")
+
+	flag.Parse()
+
+	model := *modelFlag
+	runsDefault := *runsFlag
+	runTimeout := time.Duration(*timeoutFlag) * time.Second
+
 	if err := os.MkdirAll(filepath.Dir(outputFile), 0755); err != nil {
 		log.Fatalf("Error creating results directory: %v", err)
 	}
@@ -99,6 +111,7 @@ func main() {
 
 	fmt.Println("==================================================")
 	fmt.Printf("Evaluating Validation Queries with model: %s\n", model)
+	fmt.Printf("Default Runs: %d | Timeout: %s\n", runsDefault, runTimeout)
 	fmt.Printf("Log Directory: ./%s/\n", currentLogDir)
 	fmt.Println("==================================================")
 
@@ -212,7 +225,7 @@ func main() {
 			ID:            q.ID,
 			Query:         q.Query,
 			ShouldTrigger: q.ShouldTrigger,
-			Triggers:      triggerCount > 0,
+			Triggers:      triggerCount, // Saves total trigger count across all runs
 			Runs:          runs,
 			TriggerRate:   triggerRateRounded,
 		})
