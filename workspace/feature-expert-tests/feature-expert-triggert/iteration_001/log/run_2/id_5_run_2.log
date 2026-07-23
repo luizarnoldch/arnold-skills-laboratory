@@ -1,0 +1,14 @@
+=== RUN METADATA ===
+ID: 5
+Timestamp: 2026-07-23T03:56:25-05:00
+Query: Link feature 'Payments' to PRD prd_0002
+Model: digitalocean/nemotron-3-ultra-550b
+Run: 2/3
+Expected Trigger: true
+Timeout: 1m0s
+====================
+
+[0m
+> build · nemotron-3-ultra-550b
+[0m
+[0m→ [0mSkill "feature-expert"

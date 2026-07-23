@@ -1,0 +1,31 @@
+=== RUN METADATA ===
+ID: 12
+Timestamp: 2026-07-23T04:05:01-05:00
+Query: Explain the overall project architecture
+Model: digitalocean/nemotron-3-ultra-550b
+Run: 1/3
+Expected Trigger: false
+Timeout: 1m0s
+====================
+
+[0m
+> build · nemotron-3-ultra-550b
+[0m
+[0m✱ [0mGlob "**/*"[90m 100 matches[0m
+[0m→ [0mRead .opencode/skills/feature-expert/SKILL.md
+[0m→ [0mRead .opencode/package.json
+[0m→ [0mRead train_queries.json
+[0m→ [0mRead validation_queries.json
+This is a **test/evaluation harness for the `feature-expert` OpenCode skill**. 
+
+**Architecture:**
+- **Skill under test**: `feature-expert` (in `.opencode/skills/feature-expert/SKILL.md`) — manages feature lifecycle in `FEATURES.yml` and `spec/archive/FEATURES.yml`
+- **Test data**: `train_queries.json` (12 queries) and `validation_queries.json` (8 queries) with `should_trigger` labels
+- **Runner**: Go programs (`run_train_eval.go`, `run_validation_eval.go`) that invoke OpenCode to test skill triggering
+- **Results**: `results/train_results.json`, `results/validation_results.json`
+- **Logs**: `log/run_1/`, `log/run_2/` — outputs from evaluation runs
+- **Dependency**: `@opencode-ai/plugin` v1.18.3
+
+**Purpose**: Verify the skill's trigger description correctly fires on feature-management queries (initialize, update, archive, link, query features, sprint metadata, relationships) and *doesn't* fire on PRD/ADR creation, coding, git, CI/CD, package management, or architecture questions.
+
+Your query "Explain the overall project architecture" is explicitly a **negative test case** (train_queries.json:12, `should_trigger: false`).

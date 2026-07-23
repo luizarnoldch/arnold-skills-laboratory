@@ -3,9 +3,9 @@
     "id": 1,
     "query": "Initialize the FEATURES.yml file for this project",
     "should_trigger": true,
-    "triggers": 2,
+    "triggers": 3,
     "runs": 3,
-    "trigger_rate": 0.67
+    "trigger_rate": 1
   },
   {
     "id": 2,
@@ -19,33 +19,33 @@
     "id": 3,
     "query": "Archive the completed feature 'User Registration'",
     "should_trigger": true,
-    "triggers": 3,
+    "triggers": 1,
     "runs": 3,
-    "trigger_rate": 1
+    "trigger_rate": 0.33
   },
   {
     "id": 4,
     "query": "What features do we currently have tracked?",
     "should_trigger": true,
-    "triggers": 1,
+    "triggers": 3,
     "runs": 3,
-    "trigger_rate": 0.33
+    "trigger_rate": 1
   },
   {
     "id": 5,
     "query": "Link feature 'Payments' to PRD prd_0002",
     "should_trigger": true,
-    "triggers": 1,
+    "triggers": 3,
     "runs": 3,
-    "trigger_rate": 0.33
+    "trigger_rate": 1
   },
   {
     "id": 6,
     "query": "I need to track our features. Can you help set that up?",
     "should_trigger": true,
-    "triggers": 2,
+    "triggers": 3,
     "runs": 3,
-    "trigger_rate": 0.67
+    "trigger_rate": 1
   },
   {
     "id": 7,
@@ -91,8 +91,8 @@
     "id": 12,
     "query": "Explain the overall project architecture",
     "should_trigger": false,
-    "triggers": 0,
+    "triggers": 2,
     "runs": 3,
-    "trigger_rate": 0
+    "trigger_rate": 0.67
   }
 ]

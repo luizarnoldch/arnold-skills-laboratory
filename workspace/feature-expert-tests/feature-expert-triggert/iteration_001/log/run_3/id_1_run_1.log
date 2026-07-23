@@ -1,0 +1,14 @@
+=== RUN METADATA ===
+ID: 1
+Timestamp: 2026-07-23T04:07:50-05:00
+Query: Initialize the FEATURES.yml file for this project
+Model: digitalocean/gemma-4-31B-it
+Run: 1/3
+Expected Trigger: true
+Timeout: 1m0s
+====================
+
+[0m
+> build · gemma-4-31B-it
+[0m
+[0m→ [0mSkill "feature-expert"

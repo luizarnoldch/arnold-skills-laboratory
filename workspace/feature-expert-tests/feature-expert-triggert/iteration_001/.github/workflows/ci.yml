@@ -1,0 +1,96 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+
+      - name: Install opencode
+        run: |
+          curl -fsSL https://opencode.ai/install.sh | bash
+          echo "$HOME/.opencode/bin" >> $GITHUB_PATH
+
+      - name: Verify opencode installation
+        run: opencode --version
+
+      - name: Run training evaluation
+        run: go run run_train_eval.go -r 1 -s 60
+
+      - name: Run validation evaluation
+        run: go run run_validation_eval.go -r 1 -s 60
+
+      - name: Upload evaluation logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: evaluation-logs
+          path: log/
+
+      - name: Upload evaluation results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: evaluation-results
+          path: results/
+
+  build:
+    runs-on: ubuntu-latest
+    needs: test
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+
+      - name: Build training evaluator
+        run: go build -o build/train_eval run_train_eval.go
+
+      - name: Build validation evaluator
+        run: go build -o build/validation_eval run_validation_eval.go
+
+      - name: Upload binaries
+        uses: actions/upload-artifact@v4
+        with:
+          name: evaluator-binaries
+          path: build/
+
+  release:
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download binaries
+        uses: actions/download-artifact@v4
+        with:
+          name: evaluator-binaries
+          path: build/
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: build/*
+          generate_release_notes: true

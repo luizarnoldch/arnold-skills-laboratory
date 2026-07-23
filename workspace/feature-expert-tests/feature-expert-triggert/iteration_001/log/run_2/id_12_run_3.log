@@ -1,0 +1,83 @@
+=== RUN METADATA ===
+ID: 12
+Timestamp: 2026-07-23T04:05:30-05:00
+Query: Explain the overall project architecture
+Model: digitalocean/nemotron-3-ultra-550b
+Run: 3/3
+Expected Trigger: false
+Timeout: 1m0s
+====================
+
+[0m
+> build · nemotron-3-ultra-550b
+[0m
+[0m$ [0mrtk ls -la
+.github/
+.opencode/
+log/
+results/
+run_train_eval.go  6.3K
+run_validation_eval.go  6.2K
+train_queries.json  1.3K
+validation_queries.json  952B
+[0m
+[0m$ [0mrtk ls -la .opencode/
+node_modules/
+skills/
+.gitignore  63B
+package-lock.json  14.3K
+package.json  64B
+[0m
+[0m$ [0mrtk ls -la .opencode/skills/
+feature-expert/
+[0m
+[0m$ [0mrtk ls -la .opencode/skills/feature-expert/
+SKILL.md  607B
+[0m
+[0m→ [0mRead .opencode/skills/feature-expert/SKILL.md
+[0m
+[0m$ [0mrtk ls -la log/ results/
+run_1/
+run_2/
+train_results.json  2.0K
+validation_results.json  0B
+[0m
+[0m→ [0mRead run_train_eval.go
+[0m→ [0mRead run_validation_eval.go
+[0m→ [0mRead train_queries.json
+[0m→ [0mRead validation_queries.json
+This is a **skill trigger evaluation project** for testing the "feature-expert" OpenCode skill. Here's the architecture:
+
+## Project Structure
+
+```
+feature-expert-triggert/iteration_001/
+├── .opencode/skills/feature-expert/SKILL.md   # The skill being tested
+├── run_train_eval.go                          # Training evaluation script
+├── run_validation_eval.go                     # Validation evaluation script  
+├── train_queries.json                         # 12 training test queries
+├── validation_queries.json                    # 8 validation test queries
+├── results/                                   # Evaluation results
+└── log/                                       # Per-run logs (run_1/, run_2/, etc.)
+```
+
+## Core Components
+
+**Feature-Expert Skill** (`.opencode/skills/feature-expert/SKILL.md:1-5`):
+- Manages feature lifecycle in `FEATURES.yml` and `spec/archive/FEATURES.yml`
+- Handles: initialize, add, update, list, link, query, archive features
+- Manages sprint metadata and feature relationships
+- Explicitly NOT for: PRD/ADR creation, coding, git, CI/CD, architecture questions
+
+**Evaluation Scripts** (`run_train_eval.go`, `run_validation_eval.go`):
+- Run `opencode run --model <model> <query>` for each test query
+- Detect skill trigger by scanning output for `Skill "feature-expert"` or `"name":"feature-expert"`
+- Kill process early when triggered (saves time)
+- Track trigger rate across multiple runs per query
+- Save detailed logs and JSON results
+
+**Test Data**:
+- **Training queries** (12): Mix of should-trigger (feature management) and should-not-trigger (PRD, ADR, coding, architecture)
+- **Validation queries** (8): Unseen queries for final validation
+
+The project validates that the skill triggers correctly on feature-management queries and NOT on unrelated tasks.
