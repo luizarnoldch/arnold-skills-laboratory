@@ -1,0 +1,18 @@
+=== RUN METADATA ===
+ID: 12
+Timestamp: 2026-07-23T03:57:54-05:00
+Query: Explain the overall project architecture
+Model: digitalocean/deepseek-4-flash
+Run: 3/3
+Expected Trigger: false
+Timeout: 1m0s
+====================
+
+[0m
+> build · deepseek-4-flash
+[0m
+[0m→ [0mRead .
+[0m✱ [0mGlob "**/*.{md,yaml,yml,json,jsonc}"[90m in . · 4 matches[0m
+I'll explore the project structure to understand the architecture.
+[0m→ [0mRead .opencode
+[0m→ [0mRead run_train_eval.go

@@ -1,0 +1,17 @@
+=== RUN METADATA ===
+ID: 3
+Timestamp: 2026-07-23T03:40:39-05:00
+Query: Archive the completed feature 'User Registration'
+Model: digitalocean/deepseek-4-flash
+Run: 2/3
+Expected Trigger: true
+Timeout: 1m0s
+====================
+
+[0m
+> build · deepseek-4-flash
+[0m
+[0m✱ [0mGlob "**/FEATURES.yml"[90m 0 matches[0m
+[0m✱ [0mGlob "**/FEATURES.yaml"[90m 0 matches[0m
+Let me look up the current state of features and understand the setup.
+[0m→ [0mSkill "feature-expert"
