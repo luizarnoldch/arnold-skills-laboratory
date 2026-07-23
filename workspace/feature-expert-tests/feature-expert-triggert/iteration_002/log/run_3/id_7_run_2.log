@@ -1,0 +1,52 @@
+=== RUN METADATA ===
+ID: 7
+Timestamp: 2026-07-23T04:47:02-05:00
+Query: Create a new PRD for the authentication feature
+Model: digitalocean/nemotron-3-ultra-550b
+Run: 2/3
+Expected Trigger: false
+Timeout: 1m0s
+====================
+
+[0m
+> build · nemotron-3-ultra-550b
+[0m
+[0m✱ [0mGlob "**/*PRD*.md"[90m 0 matches[0m
+I'll help you create a PRD for the authentication feature. Let me first check if there are any existing PRDs in the project to follow the same format.
+[0m✱ [0mGlob "**/docs/**/*.md"[90m 0 matches[0m
+[0m✱ [0mGlob "**/*.md"[90m 0 matches[0m
+[0m
+[0m$ [0mrtk ls -la
+.opencode/
+log/
+results/
+run_train_eval.go  6.3K
+run_validation_eval.go  6.2K
+train_queries.json  1.3K
+validation_queries.json  952B
+[0m
+[0m$ [0mrtk ls -la .opencode/
+node_modules/
+skills/
+.gitignore  63B
+package-lock.json  14.3K
+package.json  64B
+[0m
+[0m$ [0mrtk ls -la .opencode/skills/
+feature-expert/
+[0m
+[0m→ [0mRead .opencode/skills/feature-expert/SKILL.md
+[0m
+[0m← [0mWrite PRD-authentication.md
+Wrote file successfully.
+[0m
+Created `PRD-authentication.md` with a comprehensive authentication feature specification including:
+
+- **Core features**: Registration, login (email/password + social), password reset, email verification
+- **Security**: MFA (TOTP + backup codes), JWT with refresh rotation, Argon2id hashing, audit logging
+- **Access control**: RBAC with user/admin/moderator roles
+- **Technical requirements**: Performance, reliability, observability specs
+- **Data models**: User, Session, AuditLog, Role schemas
+- **API endpoints**: Full REST API specification
+- **Acceptance criteria**: 18 testable conditions
+- **Timeline**: 6-week phased rollout

@@ -27,17 +27,17 @@
     "id": 4,
     "query": "What features do we currently have tracked?",
     "should_trigger": true,
-    "triggers": 1,
+    "triggers": 3,
     "runs": 3,
-    "trigger_rate": 0.33
+    "trigger_rate": 1
   },
   {
     "id": 5,
     "query": "Link feature 'Payments' to PRD prd_0002",
     "should_trigger": true,
-    "triggers": 1,
+    "triggers": 3,
     "runs": 3,
-    "trigger_rate": 0.33
+    "trigger_rate": 1
   },
   {
     "id": 6,
@@ -51,9 +51,9 @@
     "id": 7,
     "query": "Create a new PRD for the authentication feature",
     "should_trigger": false,
-    "triggers": 3,
+    "triggers": 0,
     "runs": 3,
-    "trigger_rate": 1
+    "trigger_rate": 0
   },
   {
     "id": 8,

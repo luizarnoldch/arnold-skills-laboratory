@@ -19,25 +19,25 @@
     "id": 3,
     "query": "Archive the completed feature 'User Registration'",
     "should_trigger": true,
-    "triggers": 3,
+    "triggers": 1,
     "runs": 3,
-    "trigger_rate": 1
+    "trigger_rate": 0.33
   },
   {
     "id": 4,
     "query": "What features do we currently have tracked?",
     "should_trigger": true,
-    "triggers": 3,
+    "triggers": 1,
     "runs": 3,
-    "trigger_rate": 1
+    "trigger_rate": 0.33
   },
   {
     "id": 5,
     "query": "Link feature 'Payments' to PRD prd_0002",
     "should_trigger": true,
-    "triggers": 3,
+    "triggers": 2,
     "runs": 3,
-    "trigger_rate": 1
+    "trigger_rate": 0.67
   },
   {
     "id": 6,
@@ -67,9 +67,9 @@
     "id": 9,
     "query": "Add a new REST endpoint for user login",
     "should_trigger": false,
-    "triggers": 1,
+    "triggers": 0,
     "runs": 3,
-    "trigger_rate": 0.33
+    "trigger_rate": 0
   },
   {
     "id": 10,

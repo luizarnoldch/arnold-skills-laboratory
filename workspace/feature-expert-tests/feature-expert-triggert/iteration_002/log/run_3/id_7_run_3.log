@@ -1,0 +1,29 @@
+=== RUN METADATA ===
+ID: 7
+Timestamp: 2026-07-23T04:47:41-05:00
+Query: Create a new PRD for the authentication feature
+Model: digitalocean/nemotron-3-ultra-550b
+Run: 3/3
+Expected Trigger: false
+Timeout: 1m0s
+====================
+
+[0m
+> build · nemotron-3-ultra-550b
+[0m
+[0m✱ [0mGlob "**/*PRD*"[90m 1 match[0m
+[0m✱ [0mGlob "**/FEATURES.yml"[90m 0 matches[0m
+I'll check the workspace for any existing PRD conventions or feature tracking files first.
+[0m→ [0mRead PRD-authentication.md
+A PRD for the authentication feature already exists at `PRD-authentication.md`. It's a comprehensive 248-line document covering:
+
+- **Goals & Non-Goals** - Secure auth with JWT, MFA, RBAC, audit logging (OAuth2 provider, SSO, biometrics deferred)
+- **22 User Stories** - Registration, login, social auth, session management, MFA, RBAC
+- **8 Functional Requirements** - Registration, login, password management, sessions, MFA, email verification, RBAC, audit logging
+- **Technical Requirements** - Security (Argon2id, TLS 1.3, rate limiting), performance, reliability, observability
+- **Data Models** - User, Session, AuditLog, Role tables
+- **21 API Endpoints** - Auth, MFA, Sessions, Admin
+- **18 Acceptance Criteria**
+- **Dependencies, Risks, Success Metrics, Timeline (6 weeks)**
+
+Would you like me to update this existing PRD, create a different variant, or work with this one as-is?

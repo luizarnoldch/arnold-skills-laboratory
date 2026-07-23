@@ -1,0 +1,21 @@
+=== RUN METADATA ===
+ID: 12
+Timestamp: 2026-07-23T04:43:35-05:00
+Query: Explain the overall project architecture
+Model: digitalocean/gemma-4-31B-it
+Run: 2/3
+Expected Trigger: false
+Timeout: 1m0s
+====================
+
+[0m
+> build · gemma-4-31B-it
+[0m
+[0m• [0mResearch project architecture[90m Explore Agent[0m
+[0m✓ [0mResearch project architecture[90m Explore Agent[0m
+The project is an evaluation harness designed to test if the `feature-expert` skill is correctly triggered by various queries using the `opencode` CLI.
+
+**Architecture Overview:**
+- **Core Drivers:** Go scripts (`run_train_eval.go`, `run_validation_eval.go`) that execute batch queries and monitor `opencode` output for skill trigger patterns.
+- **Data Flow:** Loads queries from JSON files (`train_queries.json`, `validation_queries.json`) and outputs aggregated statistics to `results/` and detailed logs to `log/`.
+- **Pattern:** Treats `opencode` as a black box, using string-matching on CLI output and multiple runs per query to calculate trigger rates for non-deterministic LLM responses.

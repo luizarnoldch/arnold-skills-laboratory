@@ -1,0 +1,22 @@
+=== RUN METADATA ===
+ID: 12
+Timestamp: 2026-07-23T04:44:18-05:00
+Query: Explain the overall project architecture
+Model: digitalocean/gemma-4-31B-it
+Run: 3/3
+Expected Trigger: false
+Timeout: 1m0s
+====================
+
+[0m
+> build · gemma-4-31B-it
+[0m
+[0m• [0mAnalyze project architecture[90m Explore Agent[0m
+[0m✓ [0mAnalyze project architecture[90m Explore Agent[0m
+This project is an evaluation suite used to test the triggering accuracy of the `feature-expert` skill. It uses Go scripts to run multiple queries through the `opencode` CLI and verifies if the skill is correctly invoked based on expected ground truth.
+
+### Architecture Overview
+- **Runners**: Go scripts (`run_train_eval.go`, `run_validation_eval.go`) that execute queries and monitor CLI output for skill triggers.
+- **Datasets**: JSON files (`train_queries.json`, `validation_queries.json`) containing queries and their expected `should_trigger` status.
+- **Output**: Results are stored in `results/` as aggregated JSONs, with detailed logs for each run in `log/`.
+- **Flow**: Queries $\rightarrow$ `opencode run` $\rightarrow$ Output Scanning $\rightarrow$ Trigger Rate Calculation $\rightarrow$ Result Storage.
