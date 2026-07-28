@@ -1,0 +1,62 @@
+[
+  {
+    "id": 3,
+    "query": "Update feature 'Login' — it is now blocked by 'Database Setup'",
+    "should_trigger": true
+  },
+  {
+    "id": 4,
+    "query": "Change the sprint of feature 'Dashboard' to Sprint 3",
+    "should_trigger": true
+  },
+  {
+    "id": 6,
+    "query": "Move feature 'Legacy Import' to spec/archive/FEATURES.yml",
+    "should_trigger": true
+  },
+  {
+    "id": 7,
+    "query": "What features do we currently have tracked?",
+    "should_trigger": true
+  },
+  {
+    "id": 8,
+    "query": "Link feature 'Payments' to PRD prd_0002",
+    "should_trigger": true
+  },
+  {
+    "id": 9,
+    "query": "Set sprint_start to 2026-08-01 and sprint_end to 2026-08-14 in FEATURES.yml",
+    "should_trigger": true
+  },
+  {
+    "id": 12,
+    "query": "Show me the content of spec/features/prd_0001/index.md",
+    "should_trigger": false
+  },
+  {
+    "id": 13,
+    "query": "Write an ADR for our database choice",
+    "should_trigger": false
+  },
+  {
+    "id": 14,
+    "query": "What decisions were made in adr_0003?",
+    "should_trigger": false
+  },
+  {
+    "id": 15,
+    "query": "Add a new REST endpoint for user login",
+    "should_trigger": false
+  },
+  {
+    "id": 16,
+    "query": "Create a new branch for the payment feature",
+    "should_trigger": false
+  },
+  {
+    "id": 19,
+    "query": "Install the latest version of express",
+    "should_trigger": false
+  }
+]

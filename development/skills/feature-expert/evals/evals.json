@@ -1,0 +1,40 @@
+{
+  "skill_name": "feature-expert",
+  "evals": [
+    {
+      "id": 1,
+      "name": "init-features-yml",
+      "prompt": "Initialize the FEATURES.yml file for this project so we can start tracking features and sprint metadata.",
+      "expected_output": "A valid FEATURES.yml (and archived features file if the skill requires it) with sprint_metadata and an empty or scaffolded features list.",
+      "files": [],
+      "assertions": [
+        "FEATURES.yml exists in the outputs directory",
+        "FEATURES.yml is valid YAML with a sprint_metadata section",
+        "FEATURES.yml includes a features list (array)"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "list-tracked-features",
+      "prompt": "What features do we have tracked right now? Summarize ids and names from FEATURES.yml.",
+      "expected_output": "A short summary of features from the provided FEATURES.yml, including ids and names without inventing features that are not in the file.",
+      "files": ["evals/files/FEATURES.yml"],
+      "assertions": [
+        "The response or output references features present in FEATURES.yml",
+        "No fabricated feature ids that are absent from FEATURES.yml",
+        "Feature names from the file are mentioned"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "out-of-scope-prd",
+      "prompt": "Create a new PRD document for the payment feature under spect/features/.",
+      "expected_output": "The skill should refuse or avoid creating PRD files; creating PRDs is out of scope for feature-expert.",
+      "files": [],
+      "assertions": [
+        "No new PRD markdown file is created under spect/features/",
+        "The agent indicates PRD authoring is out of scope or redirects appropriately"
+      ]
+    }
+  ]
+}

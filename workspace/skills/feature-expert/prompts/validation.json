@@ -1,0 +1,42 @@
+[
+  {
+    "id": 1,
+    "query": "Initialize the FEATURES.yml file for this project",
+    "should_trigger": true
+  },
+  {
+    "id": 2,
+    "query": "Add a new feature called 'User Authentication' to FEATURES.yml",
+    "should_trigger": true
+  },
+  {
+    "id": 5,
+    "query": "Archive the completed feature 'User Registration'",
+    "should_trigger": true
+  },
+  {
+    "id": 10,
+    "query": "I need to track our features. Can you help set that up?",
+    "should_trigger": true
+  },
+  {
+    "id": 11,
+    "query": "Create a new PRD for the authentication feature",
+    "should_trigger": false
+  },
+  {
+    "id": 17,
+    "query": "Set up a CI/CD pipeline",
+    "should_trigger": false
+  },
+  {
+    "id": 18,
+    "query": "List all markdown files in the project",
+    "should_trigger": false
+  },
+  {
+    "id": 20,
+    "query": "Explain the overall project architecture",
+    "should_trigger": false
+  }
+]

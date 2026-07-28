@@ -1,0 +1,22 @@
+=== RUN METADATA ===
+ID: 7
+Timestamp: 2026-07-23T13:51:01-05:00
+Query: Create a new PRD for the authentication feature
+Model: digitalocean/nemotron-3-ultra-550b
+Run: 1/3
+Expected Trigger: false
+Timeout: 1m0s
+====================
+
+[0m
+> build · nemotron-3-ultra-550b
+[0m
+The feature-expert skill doesn't handle creating or authoring PRD documents — that's explicitly excluded from its scope.
+
+I can help you with feature lifecycle management instead:
+- Add a new feature to `FEATURES.yml` with metadata (status, sprint, relationships)
+- Update feature status, sprint assignment, or metadata
+- Link features to existing PRDs by reference
+- Archive features or manage feature relationships
+
+Would you like to add an "authentication" feature to the feature tracking system, or is there something else feature-related I can help with?

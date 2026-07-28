@@ -1,0 +1,98 @@
+[
+  {
+    "id": 1,
+    "query": "Initialize the FEATURES.yml file for this project",
+    "should_trigger": true,
+    "triggers": 3,
+    "runs": 3,
+    "trigger_rate": 1
+  },
+  {
+    "id": 2,
+    "query": "Update feature 'Login' — it is now blocked by 'Database Setup'",
+    "should_trigger": true,
+    "triggers": 3,
+    "runs": 3,
+    "trigger_rate": 1
+  },
+  {
+    "id": 3,
+    "query": "Archive the completed feature 'User Registration'",
+    "should_trigger": true,
+    "triggers": 3,
+    "runs": 3,
+    "trigger_rate": 1
+  },
+  {
+    "id": 4,
+    "query": "What features do we currently have tracked?",
+    "should_trigger": true,
+    "triggers": 3,
+    "runs": 3,
+    "trigger_rate": 1
+  },
+  {
+    "id": 5,
+    "query": "Link feature 'Payments' to PRD prd_0002",
+    "should_trigger": true,
+    "triggers": 3,
+    "runs": 3,
+    "trigger_rate": 1
+  },
+  {
+    "id": 6,
+    "query": "I need to track our features. Can you help set that up?",
+    "should_trigger": true,
+    "triggers": 3,
+    "runs": 3,
+    "trigger_rate": 1
+  },
+  {
+    "id": 7,
+    "query": "Create a new PRD for the authentication feature",
+    "should_trigger": false,
+    "triggers": 1,
+    "runs": 3,
+    "trigger_rate": 0.33
+  },
+  {
+    "id": 8,
+    "query": "Write an ADR for our database choice",
+    "should_trigger": false,
+    "triggers": 0,
+    "runs": 3,
+    "trigger_rate": 0
+  },
+  {
+    "id": 9,
+    "query": "Add a new REST endpoint for user login",
+    "should_trigger": false,
+    "triggers": 0,
+    "runs": 3,
+    "trigger_rate": 0
+  },
+  {
+    "id": 10,
+    "query": "Set up a CI/CD pipeline",
+    "should_trigger": false,
+    "triggers": 0,
+    "runs": 3,
+    "trigger_rate": 0
+  },
+  {
+    "id": 11,
+    "query": "Install the latest version of express",
+    "should_trigger": false,
+    "triggers": 0,
+    "runs": 3,
+    "trigger_rate": 0
+  },
+  {
+    "id": 12,
+    "query": "Explain the overall project architecture",
+    "should_trigger": false,
+    "triggers": 0,
+    "runs": 3,
+    "trigger_rate": 0
+  }
+]

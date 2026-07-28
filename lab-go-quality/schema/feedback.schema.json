@@ -1,0 +1,8 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://skills-laboratory.local/schema/feedback.schema.json",
+  "title": "HumanFeedback",
+  "description": "Map of eval-slug to actionable human feedback. Empty string means OK.",
+  "type": "object",
+  "additionalProperties": { "type": "string" }
+}

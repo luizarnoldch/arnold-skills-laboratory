@@ -1,0 +1,18 @@
+=== RUN METADATA ===
+ID: 11
+Timestamp: 2026-07-23T13:09:47-05:00
+Query: Install the latest version of express
+Model: digitalocean/deepseek-4-flash
+Run: 2/3
+Expected Trigger: false
+Timeout: 1m0s
+====================
+
+[0m
+> build · deepseek-4-flash
+[0m
+[0m⚙ [0mtessl_search {"query":"express"}
+I'll search the Tessl registry for an express-related plugin.
+The most relevant result is **`tessl-labs/express-error-handling`** (v0.3.0) — a production error handling plugin for Express APIs.
+
+Do you want me to check if there's a `tessl.json` project and install it?

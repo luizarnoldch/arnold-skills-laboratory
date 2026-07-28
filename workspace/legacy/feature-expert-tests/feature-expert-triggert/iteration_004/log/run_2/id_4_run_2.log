@@ -1,0 +1,20 @@
+=== RUN METADATA ===
+ID: 4
+Timestamp: 2026-07-23T12:53:56-05:00
+Query: What features do we currently have tracked?
+Model: digitalocean/deepseek-4-flash
+Run: 2/3
+Expected Trigger: true
+Timeout: 1m0s
+====================
+
+[0m
+> build · deepseek-4-flash
+[0m
+[0m✱ [0mGlob "**/FEATURES.yml"[90m in /home/arnold/Workspace/skills-laboratory · 1 match[0m
+Let me find the FEATURES.yml file to check tracked features.
+[0m→ [0mRead FEATURES.yml
+We have 2 tracked features:
+
+- **Login** (active) — blocked by Database Setup
+- **Database Setup** (active)

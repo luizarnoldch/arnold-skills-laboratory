@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://skills-laboratory.local/schema/benchmark.schema.json",
+  "title": "IterationBenchmark",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["run_summary"],
+  "properties": {
+    "run_summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["with_skill", "without_skill", "delta"],
+      "properties": {
+        "with_skill": { "$ref": "#/$defs/configStats" },
+        "without_skill": { "$ref": "#/$defs/configStats" },
+        "old_skill": { "$ref": "#/$defs/configStats" },
+        "delta": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["pass_rate", "time_seconds", "tokens"],
+          "properties": {
+            "pass_rate": { "type": "number" },
+            "time_seconds": { "type": "number" },
+            "tokens": { "type": "number" }
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "metric": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mean", "stddev"],
+      "properties": {
+        "mean": { "type": "number" },
+        "stddev": { "type": "number" }
+      }
+    },
+    "configStats": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["pass_rate", "time_seconds", "tokens"],
+      "properties": {
+        "pass_rate": { "$ref": "#/$defs/metric" },
+        "time_seconds": { "$ref": "#/$defs/metric" },
+        "tokens": { "$ref": "#/$defs/metric" }
+      }
+    }
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://skills-laboratory.local/schema/evals.schema.json",
+  "title": "SkillOutputEvalSet",
+  "description": "Eval cases for skill output quality (agentskills.io evaluating-skills).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["skill_name", "evals"],
+  "properties": {
+    "skill_name": { "type": "string", "minLength": 1 },
+    "evals": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "prompt", "expected_output"],
+        "properties": {
+          "id": { "type": "integer", "minimum": 1 },
+          "name": { "type": "string" },
+          "prompt": { "type": "string", "minLength": 1 },
+          "expected_output": { "type": "string", "minLength": 1 },
+          "files": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "assertions": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          }
+        }
+      }
+    }
+  }
+}

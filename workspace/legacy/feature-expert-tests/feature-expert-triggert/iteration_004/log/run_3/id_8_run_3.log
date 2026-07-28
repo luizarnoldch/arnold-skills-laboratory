@@ -1,0 +1,18 @@
+=== RUN METADATA ===
+ID: 8
+Timestamp: 2026-07-23T13:52:44-05:00
+Query: Write an ADR for our database choice
+Model: digitalocean/nemotron-3-ultra-550b
+Run: 3/3
+Expected Trigger: false
+Timeout: 1m0s
+====================
+
+[0m
+> build · nemotron-3-ultra-550b
+[0m
+[0m✱ [0mGlob "**/ADR*.md"[90m 0 matches[0m
+[0m✱ [0mGlob "**/adr/*.md"[90m 1 match[0m
+[0m✱ [0mGlob "**/architecture/*.md"[90m 0 matches[0m
+[0m→ [0mRead docs/adr/001-database-choice.md
+An ADR for the database choice already exists at `docs/adr/001-database-choice.md`. It documents the decision to use **SQLite for development** and **PostgreSQL for production**, with rationale, alternatives considered, and consequences.
