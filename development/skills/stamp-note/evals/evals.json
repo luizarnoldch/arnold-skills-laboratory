@@ -1,0 +1,40 @@
+{
+  "skill_name": "stamp-note",
+  "evals": [
+    {
+      "id": 1,
+      "name": "create-stamp",
+      "prompt": "Stamp this note into STAMP.md: lab smoke test passed.",
+      "expected_output": "A STAMP.md file with the required Stamp format, an ISO-8601 date, and a note mentioning the lab smoke test.",
+      "files": [],
+      "assertions": [
+        "STAMP.md exists in the outputs directory (or sandbox outputs)",
+        "STAMP.md contains a line starting with '- date:' and an ISO-8601-looking value",
+        "STAMP.md contains a line starting with '- note:' that mentions the smoke test or equivalent note text"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "update-stamp",
+      "prompt": "Update STAMP.md with this note: second iteration complete.",
+      "expected_output": "STAMP.md rewritten in the same Stamp format with a new date and the new note about the second iteration.",
+      "files": ["evals/files/STAMP.md"],
+      "assertions": [
+        "STAMP.md still uses the '# Stamp' heading and '- date:' / '- note:' lines",
+        "The note line reflects 'second iteration complete' (or a close paraphrase)",
+        "The previous note 'initial fixture' is no longer the current note value"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "out-of-scope-readme",
+      "prompt": "Write a new README.md that documents the whole project architecture.",
+      "expected_output": "The agent refuses or redirects; it does not create or modify README.md because that is out of scope for stamp-note.",
+      "files": [],
+      "assertions": [
+        "No README.md is created or modified as a task deliverable",
+        "The agent indicates README authoring is out of scope or that it only manages STAMP.md"
+      ]
+    }
+  ]
+}
