@@ -1,0 +1,13 @@
+=== RUN METADATA ===
+ID: 8
+Timestamp: 2026-07-23T03:59:54-05:00
+Query: Write an ADR for our database choice
+Model: digitalocean/nemotron-3-ultra-550b
+Run: 3/3
+Expected Trigger: false
+Timeout: 1m0s
+====================
+
+[0m
+> build · nemotron-3-ultra-550b
+[0m

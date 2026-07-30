@@ -1,0 +1,72 @@
+[
+  {
+    "id": 3,
+    "query": "Update feature 'Login' — it is now blocked by 'Database Setup'",
+    "should_trigger": true
+  },
+  {
+    "id": 4,
+    "query": "Change the sprint of feature 'Dashboard' to Sprint 3",
+    "should_trigger": true
+  },
+  {
+    "id": 6,
+    "query": "Move feature 'Legacy Import' to spect/archive/FEATURES.yml",
+    "should_trigger": true
+  },
+  {
+    "id": 8,
+    "query": "Link feature 'Payments' to PRD spect/features/prd_0002/index.md",
+    "should_trigger": true
+  },
+  {
+    "id": 9,
+    "query": "Set sprint_start to 2026-08-01 and sprint_end to 2026-08-14 in FEATURES.yml",
+    "should_trigger": true
+  },
+  {
+    "id": 10,
+    "query": "I need to track our features. Can you help set that up?",
+    "should_trigger": true
+  },
+  {
+    "id": 11,
+    "query": "Create a new PRD for the authentication feature",
+    "should_trigger": false
+  },
+  {
+    "id": 15,
+    "query": "Add a new REST endpoint for user login",
+    "should_trigger": false
+  },
+  {
+    "id": 17,
+    "query": "Set up a CI/CD pipeline",
+    "should_trigger": false
+  },
+  {
+    "id": 18,
+    "query": "List all markdown files in the project",
+    "should_trigger": false
+  },
+  {
+    "id": 19,
+    "query": "Install the latest version of express",
+    "should_trigger": false
+  },
+  {
+    "id": 20,
+    "query": "Explain the overall project architecture",
+    "should_trigger": false
+  },
+  {
+    "id": 22,
+    "query": "Create a feature 'Payment Webhooks' and link it to spect/features/prd_00010/index.md",
+    "should_trigger": true
+  },
+  {
+    "id": 24,
+    "query": "Remove the ADR file adr_0003 from the repo",
+    "should_trigger": false
+  }
+]

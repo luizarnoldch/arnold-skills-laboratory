@@ -1,0 +1,78 @@
+=== RUN METADATA ===
+ID: 12
+Timestamp: 2026-07-23T04:54:08-05:00
+Query: Explain the overall project architecture
+Model: digitalocean/nemotron-3-ultra-550b
+Run: 2/3
+Expected Trigger: false
+Timeout: 1m0s
+====================
+
+[0m
+> build · nemotron-3-ultra-550b
+[0m
+[0m$ [0mrtk ls -la
+.github/
+.opencode/
+log/
+results/
+ADR-001-database-choice.md  3.6K
+PRD-authentication.md  6.7K
+run_train_eval.go  6.3K
+run_validation_eval.go  6.2K
+train_queries.json  1.3K
+validation_queries.json  952B
+[0m
+[0m$ [0mrtk ls -la .opencode/
+node_modules/
+skills/
+.gitignore  63B
+package-lock.json  14.3K
+package.json  136B
+[0m
+[0m$ [0mrtk ls -la .opencode/skills/
+feature-expert/
+[0m
+[0m→ [0mRead .opencode/skills/feature-expert/SKILL.md
+[0m→ [0mRead ADR-001-database-choice.md
+[0m→ [0mRead PRD-authentication.md
+[0m
+[0m$ [0mrtk ls -la log/
+run_1/
+run_2/
+run_3/
+[0m
+[0m$ [0mrtk ls -la results/
+train_results.json  2.0K
+validation_results.json  0B
+[0m
+[0m✗ [0mRead train_results.json failed
+[91m[1mError: [0mFile not found: /home/arnold/Workspace/skills-laboratory/workspace/feature-expert-tests/feature-expert-triggert/iteration_002/train_results.json
+
+Did you mean one of these?
+/home/arnold/Workspace/skills-laboratory/workspace/feature-expert-tests/feature-expert-triggert/iteration_002/results
+[0m→ [0mRead results/train_results.json
+This project is a **feature-expert skill testing framework** (iteration_002) with two main components:
+
+## Core Architecture
+
+**1. Feature Management System** (`.opencode/skills/feature-expert/`)
+- Skill that manages feature lifecycle in `FEATURES.yml` and `spect/archive/FEATURES.yml`
+- Handles: initialize, add, update, list, query, link, archive features
+- Manages sprint metadata and feature relationships (blocked_by, blocking, related_with)
+- **Does NOT** handle: PRD/ADR authoring, coding, git, CI/CD, package management
+
+**2. Authentication Feature Design** (documents in root)
+- **ADR-001**: PostgreSQL 15+ selected for auth database (ACID, JSONB, advisory locks, proven scale)
+- **PRD-authentication.md**: Complete auth system spec with:
+  - Core auth (register, login, social, logout, password reset, email verification)
+  - Session management (JWT 15min, refresh 7 days rotating)
+  - MFA (TOTP, backup codes)
+  - RBAC (user/admin/moderator roles)
+  - Audit logging
+  - 10K concurrent users, horizontal scaling ready
+
+**3. Evaluation Framework** (`run_*.go`, `*_queries.json`, `results/`, `log/`)
+- Go-based evaluation runners for skill trigger detection
+- Train/validation query sets testing feature-expert trigger accuracy
+- Current train results: 11/12 queries correct (query 12 "Explain the overall project architecture" has 33% false positive rate)

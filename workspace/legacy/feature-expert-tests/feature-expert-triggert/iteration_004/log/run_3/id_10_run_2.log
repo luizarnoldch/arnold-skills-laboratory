@@ -1,0 +1,25 @@
+=== RUN METADATA ===
+ID: 10
+Timestamp: 2026-07-23T13:54:23-05:00
+Query: Set up a CI/CD pipeline
+Model: digitalocean/nemotron-3-ultra-550b
+Run: 2/3
+Expected Trigger: false
+Timeout: 1m0s
+====================
+
+[0m
+> build · nemotron-3-ultra-550b
+[0m
+[0m✱ [0mGlob "**/*"[90m 100 matches[0m
+[0m→ [0mRead .github/workflows/ci.yml
+[0m→ [0mRead package.json
+A CI/CD pipeline already exists at `.github/workflows/ci.yml`. It includes:
+
+- **Test job**: Runs on push/PR to main/develop, installs deps, runs linting and tests
+- **Build job**: Runs after tests pass, builds the project
+- **Deploy job**: Runs on push to main only, deploys to production
+
+The `package.json` has the necessary scripts (`lint`, `test`, `build`) configured.
+
+What would you like to change about the existing pipeline?

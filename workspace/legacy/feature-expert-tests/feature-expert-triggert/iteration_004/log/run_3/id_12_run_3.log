@@ -1,0 +1,58 @@
+=== RUN METADATA ===
+ID: 12
+Timestamp: 2026-07-23T13:57:13-05:00
+Query: Explain the overall project architecture
+Model: digitalocean/nemotron-3-ultra-550b
+Run: 3/3
+Expected Trigger: false
+Timeout: 1m0s
+====================
+
+[0m
+> build · nemotron-3-ultra-550b
+[0m
+[0m$ [0mrtk ls -la
+.github/
+.opencode/
+docs/
+log/
+node_modules/
+results/
+FEATURES.yml  105B
+package-lock.json  187.0K
+package.json  346B
+run_train_eval.go  6.3K
+run_validation_eval.go  6.2K
+server.js  628B
+train_queries.json  1.3K
+validation_queries.json  952B
+[0m
+[0m→ [0mRead package.json
+[0m→ [0mRead server.js
+[0m→ [0mRead FEATURES.yml
+[0m
+[0m$ [0mrtk ls -la .opencode/
+node_modules/
+skills/
+.gitignore  63B
+package-lock.json  14.3K
+package.json  64B
+[0m
+[0m$ [0mrtk ls -la .opencode/skills/
+feature-expert/
+[0m
+[0m$ [0mrtk ls -la .opencode/skills/feature-expert/
+SKILL.md  884B
+[0m
+This is a **feature-expert skill test iteration** (`iteration_004`) with the following architecture:
+
+**Project Root** (`/workspace/feature-expert-tests/feature-expert-triggert/iteration_004/`)
+- **Node.js/Express app** (`server.js:1-25`) - Simple auth API with `/api/login` endpoint
+- **Feature tracking** (`FEATURES.yml:1-9`) - Two features: "Login" (blocked by "Database Setup") and "Database Setup"
+- **Test infrastructure** - Training/validation eval Go binaries, query JSON files, results dir
+- **Package config** - Express dependency, ESLint/Jest dev deps
+
+**OpenCode Skill** (`.opencode/skills/feature-expert/`)
+- **feature-expert skill** (`SKILL.md:884B`) - Manages feature lifecycle in FEATURES.yml (initialize, add, update, list, query, link, archive features; sprint metadata; feature relationships)
+
+This appears to be a **skill development/test environment** where the feature-expert skill is being evaluated against training/validation query sets. The actual application is a minimal Express server used as a test fixture.

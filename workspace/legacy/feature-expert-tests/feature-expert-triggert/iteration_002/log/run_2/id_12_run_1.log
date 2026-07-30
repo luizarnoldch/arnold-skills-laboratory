@@ -1,0 +1,25 @@
+=== RUN METADATA ===
+ID: 12
+Timestamp: 2026-07-23T04:42:36-05:00
+Query: Explain the overall project architecture
+Model: digitalocean/gemma-4-31B-it
+Run: 1/3
+Expected Trigger: false
+Timeout: 1m0s
+====================
+
+[0m
+> build · gemma-4-31B-it
+[0m
+[0m• [0mAnalyze project architecture[90m Explore Agent[0m
+[0m✓ [0mAnalyze project architecture[90m Explore Agent[0m
+This project is an evaluation framework designed to test the trigger rate of the `feature-expert` AI skill. It measures how consistently an LLM invokes the skill when presented with specific user queries.
+
+### Architecture Overview
+*   **Core Purpose**: Evaluates the "triggering" behavior of the `feature-expert` skill by running multiple queries and calculating the percentage of successful invocations.
+*   **Tech Stack**: Written in **Go**, utilizing the `opencode` CLI to interact with LLMs.
+*   **Workflow**:
+    1.  **Input**: Loads queries from `train_queries.json` or `validation_queries.json`.
+    2.  **Execution**: Runs `opencode run --model <model> "<query>"` for each test case.
+    3.  **Detection**: Monitors stdout/stderr for the string `Skill "feature-expert"` or `"name":"feature-expert"`.
+    4.  **Aggregation**: Records results in `results/` and detailed logs in `log/`.

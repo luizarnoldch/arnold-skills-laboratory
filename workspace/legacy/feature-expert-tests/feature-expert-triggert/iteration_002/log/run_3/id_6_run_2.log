@@ -1,0 +1,14 @@
+=== RUN METADATA ===
+ID: 6
+Timestamp: 2026-07-23T04:46:46-05:00
+Query: I need to track our features. Can you help set that up?
+Model: digitalocean/nemotron-3-ultra-550b
+Run: 2/3
+Expected Trigger: true
+Timeout: 1m0s
+====================
+
+[0m
+> build · nemotron-3-ultra-550b
+[0m
+[0m→ [0mSkill "feature-expert"

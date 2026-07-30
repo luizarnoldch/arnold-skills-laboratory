@@ -1,0 +1,22 @@
+=== RUN METADATA ===
+ID: 8
+Timestamp: 2026-07-23T13:52:01-05:00
+Query: Write an ADR for our database choice
+Model: digitalocean/nemotron-3-ultra-550b
+Run: 1/3
+Expected Trigger: false
+Timeout: 1m0s
+====================
+
+[0m
+> build · nemotron-3-ultra-550b
+[0m
+I'll help you write an ADR for your database choice. To create a proper Architecture Decision Record, I need some context about your project:
+
+1. **What database options are you considering?** (e.g., PostgreSQL, MySQL, MongoDB, DynamoDB, etc.)
+2. **What are your key requirements?** (e.g., ACID compliance, scalability, query complexity, team expertise, cost)
+3. **What's your current architecture/stack?**
+4. **Any specific constraints?** (cloud provider, budget, compliance, existing data)
+5. **Do you have an existing ADR template or location where ADRs are stored?**
+
+Once you provide these details, I can write a comprehensive ADR following standard format (Context, Decision, Consequences, Alternatives Considered).

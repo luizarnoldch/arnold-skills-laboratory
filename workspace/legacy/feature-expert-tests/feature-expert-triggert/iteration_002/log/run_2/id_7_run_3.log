@@ -1,0 +1,14 @@
+=== RUN METADATA ===
+ID: 7
+Timestamp: 2026-07-23T04:39:31-05:00
+Query: Create a new PRD for the authentication feature
+Model: digitalocean/gemma-4-31B-it
+Run: 3/3
+Expected Trigger: false
+Timeout: 1m0s
+====================
+
+[0m
+> build · gemma-4-31B-it
+[0m
+I cannot create or author PRD documents. I can help you manage the feature lifecycle in `FEATURES.yml` once the PRD exists.

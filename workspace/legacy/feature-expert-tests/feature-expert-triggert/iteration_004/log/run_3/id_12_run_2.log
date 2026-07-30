@@ -1,0 +1,79 @@
+=== RUN METADATA ===
+ID: 12
+Timestamp: 2026-07-23T13:56:41-05:00
+Query: Explain the overall project architecture
+Model: digitalocean/nemotron-3-ultra-550b
+Run: 2/3
+Expected Trigger: false
+Timeout: 1m0s
+====================
+
+[0m
+> build · nemotron-3-ultra-550b
+[0m
+[0m$ [0mrtk ls -la
+.github/
+.opencode/
+docs/
+log/
+node_modules/
+results/
+FEATURES.yml  105B
+package-lock.json  187.0K
+package.json  346B
+run_train_eval.go  6.3K
+run_validation_eval.go  6.2K
+server.js  628B
+train_queries.json  1.3K
+validation_queries.json  952B
+[0m
+[0m→ [0mRead package.json
+[0m→ [0mRead server.js
+[0m→ [0mRead FEATURES.yml
+[0m
+[0m$ [0mrtk ls -la .opencode/
+node_modules/
+skills/
+.gitignore  63B
+package-lock.json  14.3K
+package.json  64B
+[0m
+[0m$ [0mrtk ls -la .opencode/skills/
+feature-expert/
+[0m
+[0m$ [0mrtk ls -la .opencode/skills/feature-expert/
+SKILL.md  884B
+[0m
+[0m→ [0mRead train_queries.json
+This is a **Node.js/Express project with a feature tracking system and custom opencode skill**. Here's the architecture:
+
+## Core Application
+- **Express server** (`server.js:1-25`) - Single `/api/login` endpoint with mock authentication
+- **Dependencies**: Express 5.x, ESLint, Jest for testing
+
+## Feature Management System
+- **FEATURES.yml** (`FEATURES.yml:1-9`) - YAML-based feature tracker with status and dependencies
+  - `Login` (active, blocked by `Database Setup`)
+  - `Database Setup` (active)
+
+## Custom Opencode Skill
+- **feature-expert skill** (`.opencode/skills/feature-expert/SKILL.md`) - Manages feature lifecycle in FEATURES.yml
+  - Initialize/update/archive features
+  - Manage sprint metadata
+  - Handle feature relationships (blocked_by, blocking, related_with)
+  - Link features to PRDs by reference
+
+## Evaluation Framework
+- **Training/validation queries** (`train_queries.json`, `validation_queries.json`) - Test queries for the feature-expert skill trigger detection
+- **Go evaluation scripts** (`run_train_eval.go`, `run_validation_eval.go`) - Skill trigger evaluation
+
+## Project Structure
+```
+├── server.js              # Express app entry point
+├── FEATURES.yml           # Feature tracking data
+├── package.json           # Node.js config
+├── .opencode/skills/feature-expert/  # Custom skill
+├── train_queries.json     # Skill trigger training data
+├── validation_queries.json # Skill trigger validation data
+└── run_*_eval.go          # Evaluation runners
+```

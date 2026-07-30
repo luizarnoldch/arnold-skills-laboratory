@@ -1,0 +1,36 @@
+=== RUN METADATA ===
+ID: 7
+Timestamp: 2026-07-23T13:51:13-05:00
+Query: Create a new PRD for the authentication feature
+Model: digitalocean/nemotron-3-ultra-550b
+Run: 2/3
+Expected Trigger: false
+Timeout: 1m0s
+====================
+
+[0m
+> build · nemotron-3-ultra-550b
+[0m
+[0m$ [0mrtk ls -la
+.opencode/
+log/
+node_modules/
+results/
+FEATURES.yml  105B
+package-lock.json  29.4K
+package.json  119B
+run_train_eval.go  6.3K
+run_validation_eval.go  6.2K
+train_queries.json  1.3K
+validation_queries.json  952B
+[0m
+I'll help you create a PRD for the authentication feature. Let me first check the project structure to understand the existing conventions.
+[0m→ [0mRead FEATURES.yml
+[0m
+[0m$ [0mrtk ls -la spec/ 2>/dev/null || echo "spec directory doesn't exist"
+spec directory doesn't exist
+[0m
+[0m$ [0mrtk ls -la spec/archive/ 2>/dev/null || echo "spec/archive directory doesn't exist"
+spec/archive directory doesn't exist
+[0m
+[0m→ [0mSkill "feature-expert"

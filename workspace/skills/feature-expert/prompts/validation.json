@@ -1,0 +1,52 @@
+[
+  {
+    "id": 1,
+    "query": "Initialize the FEATURES.yml file for this project",
+    "should_trigger": true
+  },
+  {
+    "id": 2,
+    "query": "Add a new feature called 'User Authentication' to FEATURES.yml",
+    "should_trigger": true
+  },
+  {
+    "id": 5,
+    "query": "Archive the completed feature 'User Registration'",
+    "should_trigger": true
+  },
+  {
+    "id": 7,
+    "query": "What features do we currently have tracked?",
+    "should_trigger": true
+  },
+  {
+    "id": 12,
+    "query": "Show me the content of spect/features/prd_0001/index.md",
+    "should_trigger": false
+  },
+  {
+    "id": 13,
+    "query": "Write an ADR for our database choice",
+    "should_trigger": false
+  },
+  {
+    "id": 14,
+    "query": "What decisions were made in adr_0003?",
+    "should_trigger": false
+  },
+  {
+    "id": 16,
+    "query": "Create a new branch for the payment feature",
+    "should_trigger": false
+  },
+  {
+    "id": 21,
+    "query": "Remove feature feat-legacy-04 from FEATURES.yml",
+    "should_trigger": true
+  },
+  {
+    "id": 23,
+    "query": "Delete the payment PRD under spect/features/prd_00010/",
+    "should_trigger": false
+  }
+]

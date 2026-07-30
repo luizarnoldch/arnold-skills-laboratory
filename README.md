@@ -1,0 +1,1 @@
+./scripts/lab/complete-run-skill.sh --skill feature-expert --provider opencode --model digitalocean/deepseek-v4-pro --runs 1

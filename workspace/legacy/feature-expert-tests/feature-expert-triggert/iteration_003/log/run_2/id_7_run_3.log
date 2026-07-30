@@ -1,0 +1,16 @@
+=== RUN METADATA ===
+ID: 7
+Timestamp: 2026-07-23T04:39:18-05:00
+Query: Create a new PRD for the authentication feature
+Model: digitalocean/deepseek-4-flash
+Run: 3/3
+Expected Trigger: false
+Timeout: 1m0s
+====================
+
+[0m
+> build · deepseek-4-flash
+[0m
+Let me check if the feature-expert skill should be triggered here. The skill description says it triggers for managing features in FEATURES.yml, but explicitly says "Does NOT apply to creating or authoring PRD documents — creating a new PRD is never a trigger." Since the user is asking to create a new PRD, this skill should NOT trigger.
+
+I won't load the feature-expert skill. The user is asking to create a PRD, which is explicitly excluded from the skill's trigger scope.

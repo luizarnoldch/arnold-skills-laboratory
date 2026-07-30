@@ -1,0 +1,42 @@
+[
+  {
+    "id": 1,
+    "query": "Create STAMP.md and stamp this note: kickoff complete",
+    "should_trigger": true
+  },
+  {
+    "id": 2,
+    "query": "Update STAMP.md with today's note: review finished",
+    "should_trigger": true
+  },
+  {
+    "id": 4,
+    "query": "Mark the file STAMP.md with note 'deploy ready'",
+    "should_trigger": true
+  },
+  {
+    "id": 5,
+    "query": "Record a note in STAMP.md saying the lab run succeeded",
+    "should_trigger": true
+  },
+  {
+    "id": 12,
+    "query": "Create a new PRD for the authentication feature",
+    "should_trigger": false
+  },
+  {
+    "id": 13,
+    "query": "Initialize the FEATURES.yml file for this project",
+    "should_trigger": false
+  },
+  {
+    "id": 17,
+    "query": "Set up a CI/CD pipeline",
+    "should_trigger": false
+  },
+  {
+    "id": 20,
+    "query": "Run the unit tests and fix any failures",
+    "should_trigger": false
+  }
+]

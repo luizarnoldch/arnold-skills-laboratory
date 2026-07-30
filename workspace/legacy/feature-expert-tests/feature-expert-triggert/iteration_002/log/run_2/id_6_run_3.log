@@ -1,0 +1,14 @@
+=== RUN METADATA ===
+ID: 6
+Timestamp: 2026-07-23T04:39:08-05:00
+Query: I need to track our features. Can you help set that up?
+Model: digitalocean/gemma-4-31B-it
+Run: 3/3
+Expected Trigger: true
+Timeout: 1m0s
+====================
+
+[0m
+> build · gemma-4-31B-it
+[0m
+[0m→ [0mSkill "feature-expert"

@@ -1,0 +1,18 @@
+=== RUN METADATA ===
+ID: 12
+Timestamp: 2026-07-23T04:05:21-05:00
+Query: Explain the overall project architecture
+Model: digitalocean/nemotron-3-ultra-550b
+Run: 2/3
+Expected Trigger: false
+Timeout: 1m0s
+====================
+
+[0m
+> build · nemotron-3-ultra-550b
+[0m
+[0m✱ [0mGlob "**/*"[90m 100 matches[0m
+[0m→ [0mRead .opencode/package.json
+[0m→ [0mRead train_queries.json
+[0m→ [0mRead validation_queries.json
+[0m→ [0mSkill "feature-expert"

@@ -1,0 +1,62 @@
+[
+  {
+    "id": 3,
+    "query": "Stamp this: smoke test green",
+    "should_trigger": true
+  },
+  {
+    "id": 6,
+    "query": "Please write a stamp note: iteration 2 done",
+    "should_trigger": true
+  },
+  {
+    "id": 7,
+    "query": "Refresh STAMP.md — note: waiting on QA",
+    "should_trigger": true
+  },
+  {
+    "id": 8,
+    "query": "hey can you stamp 'merge approved' into STAMP.md?",
+    "should_trigger": true
+  },
+  {
+    "id": 9,
+    "query": "Initialize STAMP.md with note 'first stamp'",
+    "should_trigger": true
+  },
+  {
+    "id": 10,
+    "query": "Put this note into the stamp file: checkpoint saved",
+    "should_trigger": true
+  },
+  {
+    "id": 11,
+    "query": "Write a README.md that documents the whole project",
+    "should_trigger": false
+  },
+  {
+    "id": 14,
+    "query": "Write an ADR for our database choice",
+    "should_trigger": false
+  },
+  {
+    "id": 15,
+    "query": "Add a new REST endpoint for user login",
+    "should_trigger": false
+  },
+  {
+    "id": 16,
+    "query": "Create a new branch for the payment feature",
+    "should_trigger": false
+  },
+  {
+    "id": 18,
+    "query": "Install the latest version of express",
+    "should_trigger": false
+  },
+  {
+    "id": 19,
+    "query": "Explain the overall project architecture",
+    "should_trigger": false
+  }
+]
