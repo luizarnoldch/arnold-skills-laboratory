@@ -11,17 +11,12 @@
   },
   {
     "id": 6,
-    "query": "Move feature 'Legacy Import' to spec/archive/FEATURES.yml",
-    "should_trigger": true
-  },
-  {
-    "id": 7,
-    "query": "What features do we currently have tracked?",
+    "query": "Move feature 'Legacy Import' to spect/archive/FEATURES.yml",
     "should_trigger": true
   },
   {
     "id": 8,
-    "query": "Link feature 'Payments' to PRD prd_0002",
+    "query": "Link feature 'Payments' to PRD spect/features/prd_0002/index.md",
     "should_trigger": true
   },
   {
@@ -30,18 +25,13 @@
     "should_trigger": true
   },
   {
-    "id": 12,
-    "query": "Show me the content of spec/features/prd_0001/index.md",
-    "should_trigger": false
+    "id": 10,
+    "query": "I need to track our features. Can you help set that up?",
+    "should_trigger": true
   },
   {
-    "id": 13,
-    "query": "Write an ADR for our database choice",
-    "should_trigger": false
-  },
-  {
-    "id": 14,
-    "query": "What decisions were made in adr_0003?",
+    "id": 11,
+    "query": "Create a new PRD for the authentication feature",
     "should_trigger": false
   },
   {
@@ -50,13 +40,33 @@
     "should_trigger": false
   },
   {
-    "id": 16,
-    "query": "Create a new branch for the payment feature",
+    "id": 17,
+    "query": "Set up a CI/CD pipeline",
+    "should_trigger": false
+  },
+  {
+    "id": 18,
+    "query": "List all markdown files in the project",
     "should_trigger": false
   },
   {
     "id": 19,
     "query": "Install the latest version of express",
+    "should_trigger": false
+  },
+  {
+    "id": 20,
+    "query": "Explain the overall project architecture",
+    "should_trigger": false
+  },
+  {
+    "id": 22,
+    "query": "Create a feature 'Payment Webhooks' and link it to spect/features/prd_00010/index.md",
+    "should_trigger": true
+  },
+  {
+    "id": 24,
+    "query": "Remove the ADR file adr_0003 from the repo",
     "should_trigger": false
   }
 ]

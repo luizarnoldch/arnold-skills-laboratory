@@ -86,7 +86,7 @@ func main() {
 				sandbox := filepath.Join(runDir, "sandbox")
 				must(workspace.EnsureDir(sandbox))
 
-				copied, err := runner.CopyInputs(sandbox, inputAbs)
+				copied, err := runner.CopyEvalInputs(sandbox, inputAbs, c.Name)
 				must(err)
 
 				var useSkill string

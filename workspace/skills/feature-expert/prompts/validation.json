@@ -15,28 +15,38 @@
     "should_trigger": true
   },
   {
-    "id": 10,
-    "query": "I need to track our features. Can you help set that up?",
+    "id": 7,
+    "query": "What features do we currently have tracked?",
     "should_trigger": true
   },
   {
-    "id": 11,
-    "query": "Create a new PRD for the authentication feature",
+    "id": 12,
+    "query": "Show me the content of spect/features/prd_0001/index.md",
     "should_trigger": false
   },
   {
-    "id": 17,
-    "query": "Set up a CI/CD pipeline",
+    "id": 13,
+    "query": "Write an ADR for our database choice",
     "should_trigger": false
   },
   {
-    "id": 18,
-    "query": "List all markdown files in the project",
+    "id": 14,
+    "query": "What decisions were made in adr_0003?",
     "should_trigger": false
   },
   {
-    "id": 20,
-    "query": "Explain the overall project architecture",
+    "id": 16,
+    "query": "Create a new branch for the payment feature",
+    "should_trigger": false
+  },
+  {
+    "id": 21,
+    "query": "Remove feature feat-legacy-04 from FEATURES.yml",
+    "should_trigger": true
+  },
+  {
+    "id": 23,
+    "query": "Delete the payment PRD under spect/features/prd_00010/",
     "should_trigger": false
   }
 ]

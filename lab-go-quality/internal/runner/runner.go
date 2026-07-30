@@ -61,44 +61,87 @@ func BuildTaskPrompt(req TaskRequest) string {
 	return b.String()
 }
 
-var tokenRe = regexp.MustCompile(`(?i)(?:total[_\s-]?tokens|input[_\s-]?tokens|output[_\s-]?tokens|prompt[_\s-]?tokens|completion[_\s-]?tokens)["\s:=]+(\d+)`)
+var (
+	// totalTokensRe matches explicit total / usage totals.
+	totalTokensRe = regexp.MustCompile(`(?i)(?:total[_\s-]?tokens|token[_\s-]?count|tokens?\s*(?:used|usage)|usage["\s:=]+\{[^}]{0,200}?total)\D{0,8}(\d{1,9})`)
+	// pairTokensRe finds input/prompt and output/completion token fields for summing.
+	inputTokensRe  = regexp.MustCompile(`(?i)(?:input[_\s-]?tokens|prompt[_\s-]?tokens)\D{0,8}(\d{1,9})`)
+	outputTokensRe = regexp.MustCompile(`(?i)(?:output[_\s-]?tokens|completion[_\s-]?tokens)\D{0,8}(\d{1,9})`)
+)
 
 // ParseTokensBestEffort extracts a token count from transcript text when present.
+// Prefers an explicit total; otherwise sums the last input+output (or prompt+completion) pair.
+// Returns 0 when the CLI transcript does not expose usage (common for some providers).
 func ParseTokensBestEffort(transcript string) int64 {
-	matches := tokenRe.FindAllStringSubmatch(transcript, -1)
+	if n := lastInt(totalTokensRe, transcript); n > 0 {
+		return n
+	}
+	in := lastInt(inputTokensRe, transcript)
+	out := lastInt(outputTokensRe, transcript)
+	if in > 0 || out > 0 {
+		return in + out
+	}
+	return 0
+}
+
+func lastInt(re *regexp.Regexp, s string) int64 {
+	matches := re.FindAllStringSubmatch(s, -1)
 	if len(matches) == 0 {
 		return 0
 	}
-	var sum int64
-	seen := false
-	for _, m := range matches {
-		n, err := strconv.ParseInt(m[1], 10, 64)
-		if err != nil {
-			continue
-		}
-		sum += n
-		seen = true
-	}
-	if !seen {
+	n, err := strconv.ParseInt(matches[len(matches)-1][1], 10, 64)
+	if err != nil {
 		return 0
 	}
-	// Prefer last "total_tokens" style if present
-	last := matches[len(matches)-1]
-	if n, err := strconv.ParseInt(last[1], 10, 64); err == nil && strings.Contains(strings.ToLower(last[0]), "total") {
-		return n
-	}
-	return sum
+	return n
 }
 
-// CopyInputs copies input files into workdir, preserving basename.
+// EvalInputDestRel returns the destination path relative to the sandbox for an
+// eval input file. Prefer paths under evals/files/<evalName>/; else under
+// evals/files/; else basename (legacy flat copy).
+func EvalInputDestRel(src, evalName string) string {
+	src = filepath.ToSlash(src)
+	marker := "/evals/files/"
+	idx := strings.LastIndex(src, marker)
+	if idx < 0 {
+		return filepath.Base(src)
+	}
+	after := src[idx+len(marker):]
+	name := strings.TrimSpace(evalName)
+	if name != "" {
+		prefix := name + "/"
+		if strings.HasPrefix(after, prefix) {
+			return filepath.FromSlash(strings.TrimPrefix(after, prefix))
+		}
+		// exact file named like the eval folder is uncommon; keep after as-is below
+	}
+	if after == "" || after == "." {
+		return filepath.Base(src)
+	}
+	return filepath.FromSlash(after)
+}
+
+// CopyInputs copies input files into workdir using basename only (legacy).
 func CopyInputs(workdir string, files []string) ([]string, error) {
+	return CopyEvalInputs(workdir, files, "")
+}
+
+// CopyEvalInputs copies eval fixture files into workdir, preserving structure
+// under evals/files/<evalName>/ when evalName is set.
+func CopyEvalInputs(workdir string, files []string, evalName string) ([]string, error) {
 	var dests []string
 	for _, src := range files {
 		if strings.TrimSpace(src) == "" {
 			continue
 		}
-		base := filepath.Base(src)
-		dst := filepath.Join(workdir, base)
+		rel := EvalInputDestRel(src, evalName)
+		if rel == "" || rel == "." {
+			rel = filepath.Base(src)
+		}
+		dst := filepath.Join(workdir, rel)
+		if err := os.MkdirAll(filepath.Dir(dst), 0o755); err != nil {
+			return nil, err
+		}
 		data, err := os.ReadFile(src)
 		if err != nil {
 			return nil, fmt.Errorf("copy input %s: %w", src, err)

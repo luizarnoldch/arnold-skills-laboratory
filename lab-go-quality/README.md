@@ -63,6 +63,8 @@ Each execution appends to `iteration-N/timing.json` with a monotonic `index` and
 }
 ```
 
+`total_tokens` is parsed best-effort from the CLI transcript (`total_tokens`, `Token usage: N`, or `input_tokens`+`output_tokens`). Many providers do not print usage in stdout — then the field stays `0` and token deltas in `benchmark.json` are not meaningful. Duration is always wall-clock.
+
 Grade a single execution with `-index N`.
 
 ## Providers
@@ -103,7 +105,7 @@ go -C lab-go-quality run ./cmd/runevals \
   -timeout 600
 ```
 
-`-baseline snapshot` compares against `skill-snapshot/` and writes `old_skill/` instead of `without_skill/`.
+`-baseline snapshot` compares against `skill-snapshot/` and writes `old_skill/` instead of `without_skill/`. `benchmark.json` records `run_summary.baseline` as `without_skill` or `old_skill` so delta always points at the active baseline.
 
 ### 3. Grade
 

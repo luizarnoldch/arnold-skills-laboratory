@@ -58,3 +58,35 @@ func TestReadGetSetWrite(t *testing.T) {
 		t.Fatalf("body lost: %q", parts2.Body)
 	}
 }
+
+func TestClampDescription(t *testing.T) {
+	short := "Use this skill when managing features."
+	if got := skillmd.ClampDescription(short); got != short {
+		t.Fatalf("short: %q", got)
+	}
+	var b strings.Builder
+	for i := 0; i < skillmd.MaxDescriptionLen+50; i++ {
+		b.WriteRune('á')
+	}
+	long := b.String()
+	if !skillmd.DescriptionTooLong(long) {
+		t.Fatal("expected too long")
+	}
+	clamped := skillmd.ClampDescription(long)
+	if n := len([]rune(clamped)); n != skillmd.MaxDescriptionLen {
+		t.Fatalf("rune count=%d want %d", n, skillmd.MaxDescriptionLen)
+	}
+	if skillmd.DescriptionTooLong(clamped) {
+		t.Fatal("clamped still reported too long")
+	}
+
+	parts := skillmd.Parts{Frontmatter: "name: demo\ndescription: old\n", Body: "\n# x\n"}
+	parts.Frontmatter = skillmd.SetDescription(parts.Frontmatter, long)
+	desc, err := skillmd.GetDescription(parts.Frontmatter)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if skillmd.DescriptionTooLong(desc) {
+		t.Fatalf("SetDescription did not clamp: %d runes", len([]rune(desc)))
+	}
+}

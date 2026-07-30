@@ -4,36 +4,100 @@
     {
       "id": 1,
       "name": "init-features-yml",
-      "prompt": "Initialize the FEATURES.yml file for this project so we can start tracking features and sprint metadata.",
-      "expected_output": "A valid FEATURES.yml (and archived features file if the skill requires it) with sprint_metadata and an empty or scaffolded features list.",
+      "prompt": "This project has no feature tracking yet. Initialize FEATURES.yml (and the archived features file if needed) so we can start tracking features and sprint metadata.",
+      "expected_output": "A new FEATURES.yml with sprint_metadata and an empty features list, plus spect/archive/FEATURES.yml if the skill requires it. Files saved under the outputs directory.",
       "files": [],
       "assertions": [
         "FEATURES.yml exists in the outputs directory",
         "FEATURES.yml is valid YAML with a sprint_metadata section",
-        "FEATURES.yml includes a features list (array)"
+        "FEATURES.yml includes a features list (array), empty or scaffolded"
       ]
     },
     {
       "id": 2,
-      "name": "list-tracked-features",
-      "prompt": "What features do we have tracked right now? Summarize ids and names from FEATURES.yml.",
-      "expected_output": "A short summary of features from the provided FEATURES.yml, including ids and names without inventing features that are not in the file.",
-      "files": ["evals/files/FEATURES.yml"],
+      "name": "create-feature",
+      "prompt": "Add a new feature to FEATURES.yml named \"Notification Preferences\" with short_description \"Users can choose email vs in-app alerts\". Assign it to the current sprint. Save the updated FEATURES.yml to the outputs directory.",
+      "expected_output": "FEATURES.yml contains a new feature entry with a stable id, name Notification Preferences, the given short_description, current sprint, and empty relationship/PRD lists unless otherwise required.",
+      "files": ["evals/files/create-feature/FEATURES.yml"],
       "assertions": [
-        "The response or output references features present in FEATURES.yml",
-        "No fabricated feature ids that are absent from FEATURES.yml",
-        "Feature names from the file are mentioned"
+        "Updated FEATURES.yml is present in outputs",
+        "A feature named Notification Preferences appears under features",
+        "The new feature has an id and short_description mentioning email or in-app alerts",
+        "Existing sprint_metadata is preserved"
       ]
     },
     {
       "id": 3,
-      "name": "out-of-scope-prd",
-      "prompt": "Create a new PRD document for the payment feature under spect/features/.",
-      "expected_output": "The skill should refuse or avoid creating PRD files; creating PRDs is out of scope for feature-expert.",
-      "files": [],
+      "name": "create-feature-link-prd",
+      "prompt": "Create a new feature called \"Payment Webhooks\" in FEATURES.yml and link it to the existing PRD at spect/features/prd_00010/index.md (path_to_prds). Do not create or edit any PRD files. Save updated FEATURES.yml to outputs.",
+      "expected_output": "FEATURES.yml gains a Payment Webhooks feature whose path_to_prds includes spect/features/prd_00010/index.md. The PRD file content is unchanged and no new PRD files are created.",
+      "files": [
+        "evals/files/create-feature-link-prd/FEATURES.yml",
+        "evals/files/create-feature-link-prd/spect/features/prd_00010/index.md"
+      ],
       "assertions": [
-        "No new PRD markdown file is created under spect/features/",
-        "The agent indicates PRD authoring is out of scope or redirects appropriately"
+        "Updated FEATURES.yml is present in outputs",
+        "A feature named Payment Webhooks exists with path_to_prds including spect/features/prd_00010/index.md",
+        "No new PRD markdown was created under spect/features/",
+        "The existing prd_00010 index.md was not rewritten with unrelated content"
+      ]
+    },
+    {
+      "id": 4,
+      "name": "link-feature-prd",
+      "prompt": "Feature feat-pay-02 (Payment Webhooks) already exists but has no PRD link. Link it to spect/features/prd_00010/index.md in path_to_prds. Do not create or edit PRD files. Save updated FEATURES.yml to outputs.",
+      "expected_output": "feat-pay-02 has path_to_prds containing spect/features/prd_00010/index.md. Other features remain; PRD file untouched.",
+      "files": [
+        "evals/files/link-feature-prd/FEATURES.yml",
+        "evals/files/link-feature-prd/spect/features/prd_00010/index.md"
+      ],
+      "assertions": [
+        "Updated FEATURES.yml is present in outputs",
+        "Feature id feat-pay-02 has path_to_prds including spect/features/prd_00010/index.md",
+        "Feature feat-auth-01 remains in FEATURES.yml",
+        "No new PRD files were created under spect/features/"
+      ]
+    },
+    {
+      "id": 5,
+      "name": "update-feature",
+      "prompt": "Update feature feat-dash-03 in FEATURES.yml: set short_description to \"Date-range and status filters on the main dashboard\" and change its sprint to 13. Keep the same id and name. Save updated FEATURES.yml to outputs.",
+      "expected_output": "feat-dash-03 keeps id and name Dashboard Filters, short_description reflects date-range/status filters, sprint is 13. Other features unchanged.",
+      "files": ["evals/files/update-feature/FEATURES.yml"],
+      "assertions": [
+        "Updated FEATURES.yml is present in outputs",
+        "Feature feat-dash-03 still exists with name Dashboard Filters",
+        "feat-dash-03 short_description mentions date-range or status filters",
+        "feat-dash-03 sprint is 13",
+        "Feature feat-auth-01 remains unchanged in the file"
+      ]
+    },
+    {
+      "id": 6,
+      "name": "delete-feature",
+      "prompt": "Remove feature feat-legacy-04 (Legacy CSV Import) from FEATURES.yml entirely. Leave other features intact. Save the updated FEATURES.yml to outputs.",
+      "expected_output": "FEATURES.yml no longer lists feat-legacy-04; feat-auth-01 remains.",
+      "files": ["evals/files/delete-feature/FEATURES.yml"],
+      "assertions": [
+        "Updated FEATURES.yml is present in outputs",
+        "Feature id feat-legacy-04 is absent from the features list",
+        "Feature feat-auth-01 is still present"
+      ]
+    },
+    {
+      "id": 7,
+      "name": "archive-feature",
+      "prompt": "Feature feat-reg-00 (Basic Login Workflow) is completed. Move it from the active FEATURES.yml into the archive at spect/archive/FEATURES.yml. Leave feat-auth-01 active. Save both updated files to the outputs directory.",
+      "expected_output": "feat-reg-00 is removed from active FEATURES.yml and appears under spect/archive/FEATURES.yml (archived_features or under an archived sprint). feat-auth-01 stays active.",
+      "files": [
+        "evals/files/archive-feature/FEATURES.yml",
+        "evals/files/archive-feature/spect/archive/FEATURES.yml"
+      ],
+      "assertions": [
+        "Updated active FEATURES.yml is present in outputs",
+        "Feature feat-reg-00 is absent from the active features list",
+        "Feature feat-auth-01 remains in the active features list",
+        "Archive FEATURES.yml in outputs references feat-reg-00 or Basic Login Workflow"
       ]
     }
   ]

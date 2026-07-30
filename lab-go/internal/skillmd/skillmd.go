@@ -5,9 +5,28 @@ import (
 	"os"
 	"regexp"
 	"strings"
+	"unicode/utf8"
 )
 
+// MaxDescriptionLen is the Agent Skills specification hard limit for description.
+const MaxDescriptionLen = 1024
+
 var frontmatterRe = regexp.MustCompile(`(?s)^---\n(.*?)\n---\n?`)
+
+// ClampDescription trims and truncates to MaxDescriptionLen on a rune boundary.
+func ClampDescription(s string) string {
+	s = strings.TrimSpace(s)
+	if utf8.RuneCountInString(s) <= MaxDescriptionLen {
+		return s
+	}
+	runes := []rune(s)
+	return string(runes[:MaxDescriptionLen])
+}
+
+// DescriptionTooLong reports whether s exceeds MaxDescriptionLen (after trim).
+func DescriptionTooLong(s string) bool {
+	return utf8.RuneCountInString(strings.TrimSpace(s)) > MaxDescriptionLen
+}
 
 // Parts holds SKILL.md frontmatter and body.
 type Parts struct {
@@ -114,8 +133,9 @@ func GetDescription(frontmatter string) (string, error) {
 }
 
 // SetDescription replaces or appends the description field (folded YAML).
+// The value is clamped to MaxDescriptionLen.
 func SetDescription(frontmatter, newDescription string) string {
-	folded := strings.ReplaceAll(strings.TrimSpace(newDescription), "\n", " ")
+	folded := strings.ReplaceAll(ClampDescription(newDescription), "\n", " ")
 	block := fmt.Sprintf("description: >\n  %s\n", folded)
 	start, end, ok := findDescriptionLoc(frontmatter)
 	if !ok {

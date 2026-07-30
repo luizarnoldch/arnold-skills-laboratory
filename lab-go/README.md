@@ -10,7 +10,7 @@ lab-go/
 ├── cmd/
 │   ├── splitprompts/   # 60/40 stratified split
 │   ├── evaluate/       # prompt set → triggers / trigger_rate / accuracy
-│   └── optimize/       # train loop (never use validation here)
+│   └── optimize/       # train rewrite + validation winner selection
 └── internal/
     ├── prompt/
     ├── result/
@@ -66,11 +66,14 @@ Providers: `opencode` (ready), `codex`, `claude`, `cursor_agent` / `agent` (stub
 
 ### 4. Train — optimize description
 
+Train prompts guide rewrites. Validation prompts (sibling `validation.json` by default, or `-validation-prompts`) score each iteration; the loop restores the description with the best validation accuracy (Agent Skills anti-overfitting rule). Descriptions are clamped to 1024 characters.
+
 ```bash
 go -C lab-go run ./cmd/optimize \
   -skill-name feature-expert \
   -skill-md ../development/skills/feature-expert/SKILL.md \
   -prompts ../workspace/skills/feature-expert/prompts/train.json \
+  -validation-prompts ../workspace/skills/feature-expert/prompts/validation.json \
   -workdir ../workspace/skills/feature-expert/sandbox \
   -iterations-dir ../workspace/skills/feature-expert/iterations \
   -results-dir ../workspace/skills/feature-expert/results/train \
@@ -80,9 +83,11 @@ go -C lab-go run ./cmd/optimize \
   -max-iters 5
 ```
 
-Never pass `validation.json` to optimize.
+Do not pass `validation.json` as `-prompts` (that would leak hold-out into the rewrite). Use `-validation-prompts` instead.
 
-### 5. Validation — final accuracy
+### 5. Validation — final accuracy (optional sanity)
+
+After optimize applies the validation winner, you can still run a standalone evaluation:
 
 ```bash
 go -C lab-go run ./cmd/evaluate \

@@ -29,9 +29,19 @@ func main() {
 	fmt.Printf("with_skill  pass_rate=%.3f±%.3f time_s=%.1f tokens=%.0f\n",
 		rs.WithSkill.PassRate.Mean, rs.WithSkill.PassRate.Stddev,
 		rs.WithSkill.TimeSeconds.Mean, rs.WithSkill.Tokens.Mean)
-	fmt.Printf("without_skill pass_rate=%.3f±%.3f time_s=%.1f tokens=%.0f\n",
-		rs.WithoutSkill.PassRate.Mean, rs.WithoutSkill.PassRate.Stddev,
-		rs.WithoutSkill.TimeSeconds.Mean, rs.WithoutSkill.Tokens.Mean)
+	switch rs.Baseline {
+	case "old_skill":
+		if rs.OldSkill != nil {
+			fmt.Printf("old_skill   pass_rate=%.3f±%.3f time_s=%.1f tokens=%.0f\n",
+				rs.OldSkill.PassRate.Mean, rs.OldSkill.PassRate.Stddev,
+				rs.OldSkill.TimeSeconds.Mean, rs.OldSkill.Tokens.Mean)
+		}
+	default:
+		fmt.Printf("without_skill pass_rate=%.3f±%.3f time_s=%.1f tokens=%.0f\n",
+			rs.WithoutSkill.PassRate.Mean, rs.WithoutSkill.PassRate.Stddev,
+			rs.WithoutSkill.TimeSeconds.Mean, rs.WithoutSkill.Tokens.Mean)
+	}
+	fmt.Printf("baseline    %s\n", rs.Baseline)
 	fmt.Printf("delta       pass_rate=%+.3f time_s=%+.1f tokens=%+.0f\n",
 		rs.Delta.PassRate, rs.Delta.TimeSeconds, rs.Delta.Tokens)
 	fmt.Printf("wrote %s/benchmark.json\n", *iteration)

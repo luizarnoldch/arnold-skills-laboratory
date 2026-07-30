@@ -31,11 +31,15 @@ type Delta struct {
 }
 
 // RunSummary is the benchmark payload.
+// WithoutSkill is always present (may be zero when baseline was old_skill).
+// OldSkill is set when snapshot baseline runs exist.
+// Delta is with_skill minus without_skill if that config has data, else old_skill.
 type RunSummary struct {
 	WithSkill    ConfigStats  `json:"with_skill"`
 	WithoutSkill ConfigStats  `json:"without_skill"`
 	OldSkill     *ConfigStats `json:"old_skill,omitempty"`
 	Delta        Delta        `json:"delta"`
+	Baseline     string       `json:"baseline"` // "without_skill" | "old_skill" | "none"
 }
 
 // Report is benchmark.json.
@@ -68,8 +72,14 @@ func Compute(iterationDir string) (Report, error) {
 	without := statsFor("without_skill", passRates, times, tokens)
 	old := statsFor("old_skill", passRates, times, tokens)
 
-	baseline := without
-	if len(passRates["without_skill"]) == 0 && len(passRates["old_skill"]) > 0 {
+	baselineName := "none"
+	baseline := ConfigStats{}
+	switch {
+	case len(passRates["without_skill"]) > 0 || len(times["without_skill"]) > 0:
+		baselineName = "without_skill"
+		baseline = without
+	case len(passRates["old_skill"]) > 0 || len(times["old_skill"]) > 0:
+		baselineName = "old_skill"
 		baseline = old
 	}
 
@@ -77,6 +87,7 @@ func Compute(iterationDir string) (Report, error) {
 		RunSummary: RunSummary{
 			WithSkill:    with,
 			WithoutSkill: without,
+			Baseline:     baselineName,
 			Delta: Delta{
 				PassRate:    with.PassRate.Mean - baseline.PassRate.Mean,
 				TimeSeconds: with.TimeSeconds.Mean - baseline.TimeSeconds.Mean,

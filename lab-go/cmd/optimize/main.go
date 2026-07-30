@@ -18,10 +18,20 @@ import (
 	"skills-laboratory/lab-go/internal/skillmd"
 )
 
+type candidate struct {
+	iteration      int
+	description    string
+	trainAccuracy  float64
+	valAccuracy    float64
+	valAccuracyPct float64
+	hasValidation  bool
+}
+
 func main() {
 	skillName := flag.String("skill-name", "", "Skill under test")
 	skillMD := flag.String("skill-md", "", "Path to SKILL.md to optimize")
-	prompts := flag.String("prompts", "", "Train prompts JSON only")
+	prompts := flag.String("prompts", "", "Train prompts JSON only (guides rewrites)")
+	validationPrompts := flag.String("validation-prompts", "", "Validation prompts JSON (selects winner; default: sibling validation.json)")
 	workdir := flag.String("workdir", "", "Sandbox cwd")
 	iterationsDir := flag.String("iterations-dir", "", "Directory for iteration snapshots")
 	resultsDir := flag.String("results-dir", "", "Directory for train result JSONs")
@@ -44,7 +54,21 @@ func main() {
 	}
 
 	if strings.Contains(strings.ToLower(filepath.Base(*prompts)), "validation") {
-		fmt.Fprintln(os.Stderr, "WARNING: prompts path looks like validation data. optimize must only use train.json.")
+		fmt.Fprintln(os.Stderr, "WARNING: -prompts looks like validation data. Use -prompts for train only; pass validation via -validation-prompts.")
+	}
+
+	valPath := *validationPrompts
+	if valPath == "" {
+		sibling := filepath.Join(filepath.Dir(*prompts), "validation.json")
+		if st, err := os.Stat(sibling); err == nil && !st.IsDir() {
+			valPath = sibling
+		}
+	}
+	if valPath == "" {
+		fmt.Fprintln(os.Stderr, "WARNING: no validation prompts; winner will be last train iteration. Pass -validation-prompts or place validation.json next to train.json.")
+	} else if strings.EqualFold(filepath.Clean(*prompts), filepath.Clean(valPath)) {
+		fmt.Fprintln(os.Stderr, "error: -prompts and -validation-prompts must be different files")
+		os.Exit(2)
 	}
 
 	skillPath, err := filepath.Abs(*skillMD)
@@ -54,8 +78,16 @@ func main() {
 	if err := os.MkdirAll(*resultsDir, 0o755); err != nil {
 		fatal(err)
 	}
+	valResultsDir := ""
+	if valPath != "" {
+		valResultsDir = filepath.Join(filepath.Dir(*resultsDir), "validation")
+		if err := os.MkdirAll(valResultsDir, 0o755); err != nil {
+			fatal(err)
+		}
+	}
 
 	to := time.Duration(*timeout * float64(time.Second))
+	var best *candidate
 
 	for iteration := 1; iteration <= *maxIters; iteration++ {
 		fmt.Printf("\n######## TRAIN ITERATION %d/%d ########\n", iteration, *maxIters)
@@ -90,6 +122,43 @@ func main() {
 			fatal(err)
 		}
 
+		cand := candidate{
+			iteration:     iteration,
+			description:   currentDesc,
+			trainAccuracy: accuracy,
+		}
+
+		var valPayload result.Payload
+		if valPath != "" {
+			valOut := filepath.Join(valResultsDir, fmt.Sprintf("iter_%03d.json", iteration))
+			fmt.Printf("Evaluating validation set (%s)...\n", valPath)
+			valPayload, err = eval.Run(eval.Config{
+				SkillName:         *skillName,
+				PromptsPath:       valPath,
+				ProviderName:      *providerName,
+				Model:             *model,
+				Workdir:           *workdir,
+				OutPath:           valOut,
+				Runs:              *runs,
+				Timeout:           to,
+				MajorityThreshold: *majority,
+				LogDirBase:        *logDir,
+				NoLogs:            *noLogs,
+			})
+			if err != nil {
+				fatal(err)
+			}
+			cand.hasValidation = true
+			cand.valAccuracy = valPayload.Summary.Accuracy
+			cand.valAccuracyPct = valPayload.Summary.AccuracyPct
+			fmt.Printf("Validation accuracy: %.2f%%\n", cand.valAccuracyPct)
+		}
+
+		if best == nil || betterCandidate(cand, *best) {
+			cp := cand
+			best = &cp
+		}
+
 		iterDir, err := logdir.NextIterationDir(*iterationsDir)
 		if err != nil {
 			fatal(err)
@@ -109,23 +178,27 @@ func main() {
 		}
 
 		metrics := map[string]any{
-			"iteration":     iteration,
-			"timestamp":     time.Now().UTC().Format(time.RFC3339),
-			"accuracy":      accuracy,
-			"accuracy_pct":  payload.Summary.AccuracyPct,
-			"threshold":     *threshold,
-			"failures":      fails,
-			"decision":      decision,
-			"results_file":  outPath,
+			"iteration":               iteration,
+			"timestamp":               time.Now().UTC().Format(time.RFC3339),
+			"accuracy":                accuracy,
+			"accuracy_pct":            payload.Summary.AccuracyPct,
+			"validation_accuracy":     cand.valAccuracy,
+			"validation_accuracy_pct": cand.valAccuracyPct,
+			"threshold":               *threshold,
+			"failures":                fails,
+			"decision":                decision,
+			"results_file":            outPath,
+			"best_iteration_so_far":   best.iteration,
 		}
 		if err := writeJSON(filepath.Join(iterDir, "metrics.json"), metrics); err != nil {
 			fatal(err)
 		}
 
-		fmt.Printf("Train accuracy: %.2f%% | failures=%d | decision=%s\n",
-			payload.Summary.AccuracyPct, len(fails), decision)
+		fmt.Printf("Train accuracy: %.2f%% | failures=%d | decision=%s | best_iter=%d\n",
+			payload.Summary.AccuracyPct, len(fails), decision, best.iteration)
 
 		if strings.HasPrefix(decision, "stop") || decision == "dry_run_stop" {
+			applyBest(skillPath, best)
 			fmt.Println("Stopping train loop.")
 			return
 		}
@@ -140,7 +213,12 @@ func main() {
 			fmt.Fprintln(os.Stderr, "Failed to propose new description:", err)
 			metrics["decision"] = "optimize_failed"
 			_ = writeJSON(filepath.Join(iterDir, "metrics.json"), metrics)
+			applyBest(skillPath, best)
 			os.Exit(1)
+		}
+		if skillmd.DescriptionTooLong(newDesc) {
+			fmt.Fprintf(os.Stderr, "WARNING: proposed description exceeded %d chars; clamping.\n", skillmd.MaxDescriptionLen)
+			newDesc = skillmd.ClampDescription(newDesc)
 		}
 
 		parts.Frontmatter = skillmd.SetDescription(parts.Frontmatter, newDesc)
@@ -153,6 +231,62 @@ func main() {
 	}
 
 	fmt.Println("Reached max_iters without meeting threshold.")
+	applyBest(skillPath, best)
+}
+
+func betterCandidate(a, b candidate) bool {
+	if a.hasValidation && b.hasValidation {
+		if a.valAccuracy != b.valAccuracy {
+			return a.valAccuracy > b.valAccuracy
+		}
+		// tie-break: prefer higher train accuracy, then earlier iteration
+		if a.trainAccuracy != b.trainAccuracy {
+			return a.trainAccuracy > b.trainAccuracy
+		}
+		return a.iteration < b.iteration
+	}
+	if a.hasValidation != b.hasValidation {
+		return a.hasValidation
+	}
+	if a.trainAccuracy != b.trainAccuracy {
+		return a.trainAccuracy > b.trainAccuracy
+	}
+	return a.iteration < b.iteration
+}
+
+func applyBest(skillPath string, best *candidate) {
+	if best == nil {
+		return
+	}
+	parts, err := skillmd.Read(skillPath)
+	if err != nil {
+		fatal(err)
+	}
+	current, err := skillmd.GetDescription(parts.Frontmatter)
+	if err != nil {
+		fatal(err)
+	}
+	if current == best.description {
+		if best.hasValidation {
+			fmt.Printf("Keeping description from iteration %d (validation accuracy %.2f%%).\n",
+				best.iteration, best.valAccuracyPct)
+		} else {
+			fmt.Printf("Keeping description from iteration %d (train accuracy %.2f%%).\n",
+				best.iteration, best.trainAccuracy*100)
+		}
+		return
+	}
+	parts.Frontmatter = skillmd.SetDescription(parts.Frontmatter, best.description)
+	if err := skillmd.Write(skillPath, parts); err != nil {
+		fatal(err)
+	}
+	if best.hasValidation {
+		fmt.Printf("Restored best description from iteration %d (validation accuracy %.2f%%).\n",
+			best.iteration, best.valAccuracyPct)
+	} else {
+		fmt.Printf("Restored best description from iteration %d (train accuracy %.2f%%).\n",
+			best.iteration, best.trainAccuracy*100)
+	}
 }
 
 func proposeDescription(workdir, model, skillName, current string, fails []result.Item, timeout time.Duration) (string, error) {
@@ -183,8 +317,13 @@ prompts and does NOT trigger on should_trigger=false prompts.
 Rules:
 - Return ONLY the new description plain text (no YAML, no markdown fences, no quotes wrapper).
 - Keep it to 1-3 sentences / one folded paragraph.
+- Stay under %d characters (Agent Skills hard limit).
 - Include clear positive triggers AND explicit Do NOT / Does NOT negatives when helpful.
-`, skillName, current, failBlock)
+- Generalize from failure categories (intent, domain boundary, adjacent tasks). Do NOT copy
+  distinctive keywords, file names, or phrasings from the failed queries — that overfits.
+- If should-trigger cases fail, broaden when the skill applies; if should-not cases fail,
+  clarify what the skill does not cover.
+`, skillName, current, failBlock, skillmd.MaxDescriptionLen)
 
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
@@ -225,12 +364,13 @@ Rules:
 	if len(src) > 3 {
 		start = len(src) - 3
 	}
-	candidate := strings.TrimSpace(strings.Join(src[start:], " "))
-	candidate = strings.Trim(candidate, "`\"'")
-	if len(candidate) < 40 {
-		return "", fmt.Errorf("optimizer output too short: %q", candidate)
+	candidateText := strings.TrimSpace(strings.Join(src[start:], " "))
+	candidateText = strings.Trim(candidateText, "`\"'")
+	candidateText = skillmd.ClampDescription(candidateText)
+	if len(candidateText) < 40 {
+		return "", fmt.Errorf("optimizer output too short: %q", candidateText)
 	}
-	return candidate, nil
+	return candidateText, nil
 }
 
 func writeJSON(path string, v any) error {
