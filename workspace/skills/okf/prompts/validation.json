@@ -1,0 +1,42 @@
+[
+  {
+    "id": 1,
+    "query": "Create an OKF v0.2 knowledge bundle under okf/ for how our team works with AI agents",
+    "should_trigger": true
+  },
+  {
+    "id": 2,
+    "query": "Seed an Open Knowledge Format wiki with four related concepts and an index.md",
+    "should_trigger": true
+  },
+  {
+    "id": 4,
+    "query": "Migrate the OKF v0.1 concept to v0.2: replace timestamp with generated and Citations with sources",
+    "should_trigger": true
+  },
+  {
+    "id": 5,
+    "query": "Using progressive disclosure, read the OKF index.md and answer how we detect context rot",
+    "should_trigger": true
+  },
+  {
+    "id": 12,
+    "query": "Create a new CLAUDE.md that explains how to build this repository",
+    "should_trigger": false
+  },
+  {
+    "id": 13,
+    "query": "Author a new SKILL.md for stamping notes into STAMP.md",
+    "should_trigger": false
+  },
+  {
+    "id": 17,
+    "query": "Write an ADR for our database choice",
+    "should_trigger": false
+  },
+  {
+    "id": 20,
+    "query": "Add a new REST endpoint for user login",
+    "should_trigger": false
+  }
+]

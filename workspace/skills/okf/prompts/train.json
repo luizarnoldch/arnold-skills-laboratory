@@ -1,0 +1,62 @@
+[
+  {
+    "id": 3,
+    "query": "Expand our OKF bundle by adding only concepts that are already linked but missing",
+    "should_trigger": true
+  },
+  {
+    "id": 6,
+    "query": "Add an Attested Computation concept to our OKF bundle for the revenue metric",
+    "should_trigger": true
+  },
+  {
+    "id": 7,
+    "query": "Document our context window policy as an OKF Convention concept with YAML frontmatter",
+    "should_trigger": true
+  },
+  {
+    "id": 8,
+    "query": "Update okf/log.md after adding a new runbook concept to the knowledge bundle",
+    "should_trigger": true
+  },
+  {
+    "id": 9,
+    "query": "Build a small LLM-wiki style OKF graph of our team practices and runbooks",
+    "should_trigger": true
+  },
+  {
+    "id": 10,
+    "query": "Navigate the existing okf/ knowledge bundle and summarize the related concepts for RAG decisions",
+    "should_trigger": true
+  },
+  {
+    "id": 11,
+    "query": "Rewrite AGENTS.md so the coding agent always enables RAG",
+    "should_trigger": false
+  },
+  {
+    "id": 14,
+    "query": "Write a README.md that documents the whole project architecture",
+    "should_trigger": false
+  },
+  {
+    "id": 15,
+    "query": "Initialize FEATURES.yml so we can track sprint features",
+    "should_trigger": false
+  },
+  {
+    "id": 16,
+    "query": "Create a new PRD for the authentication feature",
+    "should_trigger": false
+  },
+  {
+    "id": 18,
+    "query": "Put an okf/ folder on our marketing site to improve Google SEO rankings",
+    "should_trigger": false
+  },
+  {
+    "id": 19,
+    "query": "Create a new git branch for the payment feature",
+    "should_trigger": false
+  }
+]

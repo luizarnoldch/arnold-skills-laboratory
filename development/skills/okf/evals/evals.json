@@ -1,0 +1,85 @@
+{
+  "skill_name": "okf",
+  "evals": [
+    {
+      "id": 1,
+      "name": "seed-bundle",
+      "prompt": "Create an OKF v0.2 demo bundle under okf/ for how our team works with AI agents: four related concepts (context window policy practice, when we use RAG decision, detect context-rot runbook, connect MCP runbook). Real team practices only — no textbook definitions. Include root index.md with okf_version 0.2, log.md, YAML frontmatter with type on every concept, and absolute cross-links.",
+      "expected_output": "An okf/ bundle with four concept markdown files (each with parseable YAML frontmatter and non-empty type), root index.md declaring okf_version 0.2, root log.md with an initial dated entry, and markdown links between the concepts.",
+      "files": [],
+      "assertions": [
+        "okf/index.md exists and declares okf_version 0.2 (or equivalent root index)",
+        "okf/log.md exists with an ISO YYYY-MM-DD section and an initialization/creation style entry",
+        "At least four non-reserved concept .md files exist under okf/ with YAML frontmatter containing a non-empty type field",
+        "Concept bodies include absolute bundle-relative markdown links (paths starting with /) between related concepts",
+        "Concepts describe team practices/decisions/runbooks rather than generic textbook definitions of RAG/MCP"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "expand-linked-only",
+      "prompt": "Expand the existing OKF bundle by adding ONLY concepts that are already linked from the four seed documents and that do not exist yet. Do not invent unlinked topics.",
+      "expected_output": "New concept files only for targets already linked from the seed concepts; index.md and log.md updated; no orphan topics unrelated to existing links.",
+      "files": [
+        "evals/files/okf/index.md",
+        "evals/files/okf/log.md",
+        "evals/files/okf/practicas/politica-de-contexto.md",
+        "evals/files/okf/practicas/cuando-usar-rag.md",
+        "evals/files/okf/runbooks/detectar-context-rot.md",
+        "evals/files/okf/runbooks/conectar-mcp.md"
+      ],
+      "assertions": [
+        "Any new concept file corresponds to a markdown link target that already appeared in a seed concept and was missing",
+        "No new top-level topic directories or concepts that were not linked from the seed set",
+        "okf/index.md and okf/log.md are updated to reflect additions (if any files were added)"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "consume-via-index",
+      "prompt": "Using the OKF bundle, answer: how do we detect context rot and what policy does that protect? Prefer progressive disclosure — use the index, then open only the needed concepts.",
+      "expected_output": "An answer grounded in the context-rot runbook and context-window policy concepts, without dumping every file in the bundle into the response.",
+      "files": [
+        "evals/files/okf/index.md",
+        "evals/files/okf/log.md",
+        "evals/files/okf/practicas/politica-de-contexto.md",
+        "evals/files/okf/practicas/cuando-usar-rag.md",
+        "evals/files/okf/runbooks/detectar-context-rot.md",
+        "evals/files/okf/runbooks/conectar-mcp.md"
+      ],
+      "assertions": [
+        "Answer mentions detecting context rot signals / runbook behavior from detectar-context-rot",
+        "Answer relates the runbook to the context window policy concept",
+        "Response does not paste the full contents of unrelated concepts (e.g. full MCP runbook) as if the whole bundle were loaded"
+      ]
+    },
+    {
+      "id": 4,
+      "name": "out-of-scope-agents-md",
+      "prompt": "Rewrite AGENTS.md so the coding agent always enables RAG, and also add an OKF concept that defines what RAG is from first principles like a textbook.",
+      "expected_output": "The agent refuses or redirects: AGENTS.md behavior files and textbook RAG definitions are out of scope for the okf skill; it does not rewrite AGENTS.md or invent textbook definitions as OKF concepts.",
+      "files": [],
+      "assertions": [
+        "AGENTS.md is not created or rewritten as a deliverable of this skill",
+        "No OKF concept is added whose purpose is a generic textbook definition of RAG",
+        "The agent indicates those requests are out of scope or redirects to appropriate OKF workflows (team practices only)"
+      ]
+    },
+    {
+      "id": 5,
+      "name": "migrate-v01-fields",
+      "prompt": "Migrate the v0.1 OKF concept at okf/metrics/income-statement.md to OKF v0.2 frontmatter: replace timestamp with generated, move Citations into sources with footnote attribution, and set root index okf_version to 0.2.",
+      "expected_output": "The concept uses generated.at (and generated.by), has sources entries with ids, uses footnote attribution instead of a # Citations list, and root index declares okf_version 0.2.",
+      "files": [
+        "evals/files/migrate/okf/index.md",
+        "evals/files/migrate/okf/metrics/income-statement.md"
+      ],
+      "assertions": [
+        "income-statement.md frontmatter includes generated with an at timestamp (and by actor); legacy timestamp is removed or no longer the sole time field",
+        "Frontmatter includes sources with at least one entry that has resource and id",
+        "Body no longer relies on a # Citations list as the primary provenance; footnotes or sources-based attribution are used",
+        "Root index.md declares okf_version 0.2"
+      ]
+    }
+  ]
+}
