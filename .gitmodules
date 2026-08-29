@@ -1,0 +1,3 @@
+[submodule "arnold-skills"]
+	path = arnold-skills
+	url = https://github.com/luizarnoldch/arnold-skills.git
