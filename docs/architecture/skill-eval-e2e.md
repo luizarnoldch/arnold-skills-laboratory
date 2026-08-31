@@ -1,0 +1,219 @@
+# Skill eval E2E — create → orchestrate → verificar `skills_call`
+
+Flujo operativo para comprobar que, tras crear una skill en el laboratorio, un eval orquestado hace que el LLM invoque esa skill vía `skills_call`.
+
+Objetivo del proyecto y diagrama de secuencia: [`objetivo.md`](objetivo.md).
+
+## Veredicto
+
+El camino ya está cableado en tres servicios. No hace falta auto-trigger: el cliente encadena dos POSTs y lee `pass`.
+
+| Paso | Servicio | Criterio |
+|------|----------|----------|
+| Crear skill | `arnold-laboratory-api` | `201` con `id`, `id_description`, `id_content` |
+| Encolar eval | `arnold-lab-orchestrator` | `202` → worker → chavez |
+| Verificar invocación | `chavez-cli` `GET /api/v1/sessions/{id}/skill-calls` | Orquestador setea `pass` desde `called` (no desde `pass` del POST eval) |
+
+```mermaid
+sequenceDiagram
+  participant Client
+  participant LabAPI as laboratory_api
+  participant Orch as lab_orchestrator
+  participant Chavez as chavez_cli
+  participant LLM
+
+  Client->>LabAPI: POST /api/v1/skills
+  LabAPI-->>Client: id, id_description, id_content
+  Client->>Orch: POST /api/v1/skill-evals
+  Orch-->>Client: 202 id queued
+  Client->>Orch: WS /ws/runs/id
+  Orch->>LabAPI: GET skill/desc/content
+  Orch->>Chavez: POST /api/v1/evals?stream=true skill_inline
+  loop agent turns
+    Chavez->>LLM: agent loop plus skills_call
+    Chavez-->>Orch: SSE frames
+    Orch-->>Client: WS type agent
+  end
+  Chavez-->>Orch: SSE result
+  Orch->>Chavez: GET sessions id skill-calls
+  Chavez-->>Orch: called
+  Orch-->>Client: WS lifecycle completed plus pass
+```
+
+Contrato de capas: [`services/AGENTS.md`](../../services/AGENTS.md).
+
+---
+
+## Prerrequisitos
+
+Tres procesos (puertos por defecto del lab stack):
+
+| Proceso | Puerto | Arranque |
+|---------|--------|----------|
+| laboratory-api | `8080` | `cd services/arnold-laboratory-api && make migrate/up && make run` |
+| chavez Action API | `8081` | `cd services/chavez-cli && PORT=8081 LLM_PROVIDER=… go run ./cmd/chavez_api` |
+| lab-orchestrator | `8082` | `cd services/arnold-lab-orchestrator && make migrate/up && make run` |
+
+Chavez **debe** ser el binario real (`chavez_api`) con LLM usable (`LLM_PROVIDER=deepseek|cursor` + API key). El mock de Bruno (`bruno_chavez_mock`) siempre responde `pass: true` y **no** valida invocación real.
+
+Variables del orchestrator (ver [`.env.example`](../../services/arnold-lab-orchestrator/.env.example)):
+
+- `LAB_API_URL=http://127.0.0.1:8080`
+- `CHAVEZ_API_URL=http://127.0.0.1:8081`
+
+Comprobar readiness:
+
+```bash
+curl -sf http://127.0.0.1:8080/ready
+curl -sf http://127.0.0.1:8081/health   # o /ready según chavez
+curl -sf http://127.0.0.1:8082/ready
+```
+
+---
+
+## Paso 1 — Crear skill (laboratory-api)
+
+`POST /api/v1/skills` exige `name`, `description` y `content` (los tres).
+
+```bash
+curl -s -X POST http://127.0.0.1:8080/api/v1/skills \
+  -H 'content-type: application/json' \
+  -d '{
+    "name": "demo-format",
+    "description": "Use when the user asks to format or normalize demo text.",
+    "content": "When invoked, reply with the word FORMATTED and a one-line summary of the task."
+  }'
+```
+
+Respuesta `201` (campos relevantes):
+
+```json
+{
+  "id": 1,
+  "name": "demo-format",
+  "id_description": 1,
+  "id_content": 1,
+  "description": { "skill_description": "..." },
+  "content": { "skill_content": "..." }
+}
+```
+
+La skill queda solo en DB (SQLite/Turso). No se escribe `SKILL.md` en disco; el orchestrator arma el frontmatter al inyectar `skill_inline`.
+
+---
+
+## Paso 2 — Encolar skill-eval (orchestrator)
+
+```bash
+curl -s -X POST http://127.0.0.1:8082/api/v1/skill-evals \
+  -H 'content-type: application/json' \
+  -d '{
+    "skill_id": 1,
+    "description_id": 1,
+    "content_id": 1,
+    "task": "Please format this demo text using the available skill: hello world",
+    "workspace": "/tmp",
+    "provider": "deepseek",
+    "max_turns": 8
+  }'
+```
+
+Respuesta `202`: `{ "id": "<uuid>", "status": "queued" }`.
+
+El worker:
+
+1. Carga skill + description + content en Lab API y valida pertenencia.
+2. Envuelve content con frontmatter `name` / `description` si aún no lo trae.
+3. Llama `POST {CHAVEZ_API_URL}/api/v1/evals?stream=true` (`EvalStream`) con `skill`, `skill_inline`, `task`, `workspace`, `provider` (opcional); reenvía frames SSE al hub WS como `type=agent`.
+4. Persiste `chavez_session_id` del evento `result`.
+5. Llama `GET {CHAVEZ_API_URL}/api/v1/sessions/{session_id}/skill-calls?skill=<name>` y setea `pass` desde `called`.
+6. Persiste `completed` + `pass` / `final_text`, o `failed` + `error` (y publica `type=lifecycle`).
+
+`provider` opcional: `deepseek` | `cursor` (vacío = `LLM_PROVIDER` del proceso chavez).
+
+Código: [`pkg/skilleval/worker.go`](../../services/arnold-lab-orchestrator/pkg/skilleval/worker.go).
+
+---
+
+## Paso 3 — Verificar `skills_call`
+
+### Qué cuenta como éxito
+
+Chavez persiste la sesión del eval (mensajes + `run_events`). El orquestador **no** usa el `pass` del POST eval; consulta `GET /api/v1/sessions/{id}/skill-calls?skill=<name>` y toma `called` como fuente de verdad (`pass` del POST queda solo informativo / debug).
+
+El cliente **no** necesita parsear transcripts: lee el outcome del orchestrator.
+
+### Poll
+
+```bash
+curl -s http://127.0.0.1:8082/api/v1/skill-evals/<id>
+```
+
+Interpretación:
+
+| `status` | `pass` | Significado |
+|----------|--------|-------------|
+| `queued` / `running` | — | Aún en curso |
+| `completed` | `true` | Se observó `skills_call` del skill esperado |
+| `completed` | `false` | Run OK, pero el LLM **no** llamó ese skill (fallo de trigger) |
+| `failed` | — | Error de Lab API, Chavez, timeout, etc. (`error`) |
+
+### WebSocket
+
+```bash
+websocat ws://127.0.0.1:8082/ws/runs/<id>
+```
+
+Mensajes JSON con `type`:
+
+| `type` | Contenido |
+|--------|-----------|
+| `lifecycle` | `status`: `queued` → `running` → `completed` \| `failed` (`pass` / `final_text` / `error` cuando aplica) |
+| `agent` | Stream de chavez: `event` = `text_delta` \| `thinking_delta` \| `tool_call` \| `status` \| `error`; campos `text`, `tool_call`, `status` |
+
+El WS se cierra tras un lifecycle terminal. Si el cliente se conecta tarde, puede perder frames `agent` (no hay replay en el orch). El fallback poll HTTP solo ve lifecycle.
+
+---
+
+## Suite Bruno (smoke, no LLM real)
+
+```bash
+cd services/arnold-lab-orchestrator
+make bruno
+```
+
+Colección [`bruno/02-skill-eval-lifecycle/`](../../services/arnold-lab-orchestrator/bruno/02-skill-eval-lifecycle/): create skill → enqueue → poll `pass`. Usa **mock** de chavez; valida el glue HTTP, no la detección real de `skills_call`.
+
+Para E2E real: servicios en `:8080` / `:8081` (chavez real) / `:8082` y los curls de arriba (o Bruno apuntando a chavez real, sin mock).
+
+---
+
+## Redacción del `task` y la description
+
+`pass` depende del modelo. Para maximizar trigger:
+
+- `description` clara (“Use when…”).
+- `task` que encaje con esa description y nombre de skill.
+- `max_turns` suficiente para que el agente pueda emitir `skills_call` antes de responder.
+
+Si `completed` + `pass: false` de forma reiterada, ajustar description/task antes de asumir un bug de infra.
+
+---
+
+## Límites conocidos
+
+- Sin auto-run al crear la skill.
+- El orchestrator persiste `pass` + `final_text` + `chavez_session_id`; el transcript fino vive en chavez (`sessions` / `run_events`) y también se reenvía en vivo por WS (`type=agent`) sin historial al reconectar.
+- Hub WS in-memory (buffer 64; drop si el subscriber va lento); no multi-instancia.
+- Create en Lab API exige `content`, no solo name + description.
+- `make bruno` no sustituye una prueba con LLM (el mock sí emite SSE mínimo).
+- Chavez debe tener la API key del provider pedido (ambas keys si se alterna por request).
+
+---
+
+## Referencias
+
+- [`services/AGENTS.md`](../../services/AGENTS.md) — mapa Lab → Orch → Chavez
+- [`services/arnold-laboratory-api/README.md`](../../services/arnold-laboratory-api/README.md)
+- [`services/arnold-lab-orchestrator/README.md`](../../services/arnold-lab-orchestrator/README.md)
+- [`services/chavez-cli/pkg/eval/service.go`](../../services/chavez-cli/pkg/eval/service.go) — `skillCapture`

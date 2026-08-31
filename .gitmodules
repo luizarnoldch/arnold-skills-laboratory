@@ -7,3 +7,9 @@
 [submodule "services/chavez-cli"]
 	path = services/chavez-cli
 	url = https://github.com/luizarnoldch/chavez-cli.git
+[submodule "services/arnold-lab-orchestrator"]
+	path = services/arnold-lab-orchestrator
+	url = https://github.com/luizarnoldch/arnold-lab-orchestrator.git
+[submodule "services/web-ui"]
+	path = services/web-ui
+	url = https://github.com/luizarnoldch/arnold-lab-web-ui.git
