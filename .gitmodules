@@ -1,3 +1,9 @@
 [submodule "arnold-skills"]
-	path = arnold-skills
+	path = services/arnold-skills
 	url = https://github.com/luizarnoldch/arnold-skills.git
+[submodule "services/arnold-laboratory-api"]
+	path = services/arnold-laboratory-api
+	url = https://github.com/luizarnoldch/arnold-laboratory-api.git
+[submodule "services/chavez-cli"]
+	path = services/chavez-cli
+	url = https://github.com/luizarnoldch/chavez-cli.git
