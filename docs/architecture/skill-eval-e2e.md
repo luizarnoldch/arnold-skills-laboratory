@@ -125,11 +125,14 @@ El worker:
 1. Carga skill + description + content en Lab API y valida pertenencia.
 2. Envuelve content con frontmatter `name` / `description` si aún no lo trae.
 3. Llama `POST {CHAVEZ_API_URL}/api/v1/evals?stream=true` (`EvalStream`) con `skill`, `skill_inline`, `task`, `workspace`, `provider` (opcional); reenvía frames SSE al hub WS como `type=agent`.
-4. Persiste `chavez_session_id` del evento `result`.
-5. Llama `GET {CHAVEZ_API_URL}/api/v1/sessions/{session_id}/skill-calls?skill=<name>` y setea `pass` desde `called`.
-6. Persiste `completed` + `pass` / `final_text`, o `failed` + `error` (y publica `type=lifecycle`).
+4. En el primer evento SSE `session`, persiste `chavez_session_id` con `status=running` (permite `GET .../events` mid-run).
+5. Al terminar el stream, confirma `session_id` del evento `result`.
+6. Llama `GET {CHAVEZ_API_URL}/api/v1/sessions/{session_id}/skill-calls?skill=<name>` y setea `pass` desde `called`.
+7. Persiste `completed` + `pass` / `final_text`, o `failed` + `error` (y publica `type=lifecycle`).
 
 `provider` opcional: `deepseek` | `cursor` (vacío = `LLM_PROVIDER` del proceso chavez).
+
+**Cursor:** Cloud Agents ignora tools locales de chavez. Para que `skills_call` exista de verdad, chavez registra un MCP HTTP scoped al eval y lo adjunta en `POST /v1/agents` (`mcpServers`). Requiere **`CHAVEZ_PUBLIC_BASE_URL`** alcanzable desde Cursor Cloud (túnel local, p. ej. cloudflared/ngrok). Sin esa variable, el eval con `provider=cursor` falla con error claro (no `pass=false` silencioso).
 
 Código: [`pkg/skilleval/worker.go`](../../services/arnold-lab-orchestrator/pkg/skilleval/worker.go).
 
@@ -171,7 +174,7 @@ Mensajes JSON con `type`:
 | `lifecycle` | `status`: `queued` → `running` → `completed` \| `failed` (`pass` / `final_text` / `error` cuando aplica) |
 | `agent` | Stream de chavez: `event` = `text_delta` \| `thinking_delta` \| `tool_call` \| `status` \| `error`; campos `text`, `tool_call`, `status` |
 
-El WS se cierra tras un lifecycle terminal. Si el cliente se conecta tarde, puede perder frames `agent` (no hay replay en el orch). El fallback poll HTTP solo ve lifecycle.
+El WS se cierra tras un lifecycle terminal. Si el cliente se conecta tarde y ya hay `chavez_session_id`, el orch hace backfill desde `GET .../events`. El fallback poll HTTP pide lifecycle y, cuando hay session id, también hidrata events (tool_calls mid-run).
 
 ---
 
@@ -203,11 +206,12 @@ Si `completed` + `pass: false` de forma reiterada, ajustar description/task ante
 ## Límites conocidos
 
 - Sin auto-run al crear la skill.
-- El orchestrator persiste `pass` + `final_text` + `chavez_session_id`; el transcript fino vive en chavez (`sessions` / `run_events`) y también se reenvía en vivo por WS (`type=agent`) sin historial al reconectar.
+- El orchestrator persiste `pass` + `final_text` + `chavez_session_id` (este último también mid-run tras SSE `session`); el transcript fino vive en chavez (`sessions` / `run_events`) y se reenvía en vivo por WS (`type=agent`), con backfill/`GET .../events` cuando ya hay session id.
 - Hub WS in-memory (buffer 64; drop si el subscriber va lento); no multi-instancia.
 - Create en Lab API exige `content`, no solo name + description.
 - `make bruno` no sustituye una prueba con LLM (el mock sí emite SSE mínimo).
 - Chavez debe tener la API key del provider pedido (ambas keys si se alterna por request).
+- `provider=cursor` requiere `CHAVEZ_PUBLIC_BASE_URL` (MCP HTTP `skills_call` alcanzable desde Cursor Cloud).
 
 ---
 
