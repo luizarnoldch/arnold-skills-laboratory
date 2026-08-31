@@ -50,23 +50,23 @@ Tres procesos (puertos por defecto del lab stack):
 
 | Proceso | Puerto | Arranque |
 |---------|--------|----------|
-| laboratory-api | `8080` | `cd services/arnold-laboratory-api && make migrate/up && make run` |
-| chavez Action API | `8081` | `cd services/chavez-cli && PORT=8081 LLM_PROVIDER=… go run ./cmd/chavez_api` |
-| lab-orchestrator | `8082` | `cd services/arnold-lab-orchestrator && make migrate/up && make run` |
+| laboratory-api | `18180` | `cd services/arnold-laboratory-api && make migrate/up && make run` |
+| chavez Action API | `18181` | `cd services/chavez-cli && PORT=18181 LLM_PROVIDER=… go run ./cmd/chavez_api` |
+| lab-orchestrator | `18182` | `cd services/arnold-lab-orchestrator && make migrate/up && make run` |
 
 Chavez **debe** ser el binario real (`chavez_api`) con LLM usable (`LLM_PROVIDER=deepseek|cursor` + API key). El mock de Bruno (`bruno_chavez_mock`) siempre responde `pass: true` y **no** valida invocación real.
 
 Variables del orchestrator (ver [`.env.example`](../../services/arnold-lab-orchestrator/.env.example)):
 
-- `LAB_API_URL=http://127.0.0.1:8080`
-- `CHAVEZ_API_URL=http://127.0.0.1:8081`
+- `LAB_API_URL=http://127.0.0.1:18180`
+- `CHAVEZ_API_URL=http://127.0.0.1:18181`
 
 Comprobar readiness:
 
 ```bash
-curl -sf http://127.0.0.1:8080/ready
-curl -sf http://127.0.0.1:8081/health   # o /ready según chavez
-curl -sf http://127.0.0.1:8082/ready
+curl -sf http://127.0.0.1:18180/ready
+curl -sf http://127.0.0.1:18181/health   # o /ready según chavez
+curl -sf http://127.0.0.1:18182/ready
 ```
 
 ---
@@ -76,7 +76,7 @@ curl -sf http://127.0.0.1:8082/ready
 `POST /api/v1/skills` exige `name`, `description` y `content` (los tres).
 
 ```bash
-curl -s -X POST http://127.0.0.1:8080/api/v1/skills \
+curl -s -X POST http://127.0.0.1:18180/api/v1/skills \
   -H 'content-type: application/json' \
   -d '{
     "name": "demo-format",
@@ -105,7 +105,7 @@ La skill queda solo en DB (SQLite/Turso). No se escribe `SKILL.md` en disco; el 
 ## Paso 2 — Encolar skill-eval (orchestrator)
 
 ```bash
-curl -s -X POST http://127.0.0.1:8082/api/v1/skill-evals \
+curl -s -X POST http://127.0.0.1:18182/api/v1/skill-evals \
   -H 'content-type: application/json' \
   -d '{
     "skill_id": 1,
@@ -160,7 +160,7 @@ El cliente **no** necesita parsear transcripts: lee el outcome del orchestrator.
 ### Poll
 
 ```bash
-curl -s http://127.0.0.1:8082/api/v1/skill-evals/<id>
+curl -s http://127.0.0.1:18182/api/v1/skill-evals/<id>
 ```
 
 Interpretación:
@@ -176,7 +176,7 @@ Interpretación:
 
 ```bash
 curl -N -H 'Accept: text/event-stream' \
-  http://127.0.0.1:8082/api/v1/skill-evals/<id>/stream
+  http://127.0.0.1:18182/api/v1/skill-evals/<id>/stream
 ```
 
 Frames `event: lifecycle` / `event: agent` con el mismo JSON que el WebSocket. La web-ui usa este path; fallback poll si el stream cae.
@@ -184,7 +184,7 @@ Frames `event: lifecycle` / `event: agent` con el mismo JSON que el WebSocket. L
 ### WebSocket (compat)
 
 ```bash
-websocat ws://127.0.0.1:8082/ws/runs/<id>
+websocat ws://127.0.0.1:18182/ws/runs/<id>
 ```
 
 Mensajes JSON con `type`:
@@ -207,7 +207,7 @@ make bruno
 
 Colección [`bruno/02-skill-eval-lifecycle/`](../../services/arnold-lab-orchestrator/bruno/02-skill-eval-lifecycle/): create skill → enqueue → poll `pass`. Usa **mock** de chavez; valida el glue HTTP, no la detección real de `skills_call`.
 
-Para E2E real: servicios en `:8080` / `:8081` (chavez real) / `:8082` y los curls de arriba (o Bruno apuntando a chavez real, sin mock).
+Para E2E real: servicios en `:18180` / `:18181` (chavez real) / `:18182` y los curls de arriba (o Bruno apuntando a chavez real, sin mock).
 
 ---
 
