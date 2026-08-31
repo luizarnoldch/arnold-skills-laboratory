@@ -26,18 +26,18 @@ sequenceDiagram
   LabAPI-->>Client: id, id_description, id_content
   Client->>Orch: POST /api/v1/skill-evals
   Orch-->>Client: 202 id queued
-  Client->>Orch: WS /ws/runs/id
+  Client->>Orch: GET skill-evals id stream SSE
   Orch->>LabAPI: GET skill/desc/content
   Orch->>Chavez: POST /api/v1/evals?stream=true skill_inline
   loop agent turns
     Chavez->>LLM: agent loop plus skills_call
     Chavez-->>Orch: SSE frames
-    Orch-->>Client: WS type agent
+    Orch-->>Client: event agent
   end
   Chavez-->>Orch: SSE result
   Orch->>Chavez: GET sessions id skill-calls
   Chavez-->>Orch: called
-  Orch-->>Client: WS lifecycle completed plus pass
+  Orch-->>Client: event lifecycle completed plus pass
 ```
 
 Contrato de capas: [`services/AGENTS.md`](../../services/AGENTS.md).
@@ -114,7 +114,9 @@ curl -s -X POST http://127.0.0.1:8082/api/v1/skill-evals \
     "task": "Please format this demo text using the available skill: hello world",
     "workspace": "/tmp",
     "provider": "deepseek",
-    "max_turns": 8
+    "max_turns": 8,
+    "stop_on_skill_call": true,
+    "timeout_ms": 0
   }'
 ```
 
@@ -124,11 +126,20 @@ El worker:
 
 1. Carga skill + description + content en Lab API y valida pertenencia.
 2. Envuelve content con frontmatter `name` / `description` si aún no lo trae.
-3. Llama `POST {CHAVEZ_API_URL}/api/v1/evals?stream=true` (`EvalStream`) con `skill`, `skill_inline`, `task`, `workspace`, `provider` (opcional); reenvía frames SSE al hub WS como `type=agent`.
+3. Llama `POST {CHAVEZ_API_URL}/api/v1/evals?stream=true` (`EvalStream`) con `skill`, `skill_inline`, `task`, `workspace`, `provider`, y overlays opcionales `timeout_ms` / `stop_on_skill_call`; reenvía frames SSE al hub WS como `type=agent`.
 4. En el primer evento SSE `session`, persiste `chavez_session_id` con `status=running` (permite `GET .../events` mid-run).
-5. Al terminar el stream, confirma `session_id` del evento `result`.
+5. Al terminar el stream, confirma `session_id` del evento `result` y guarda `stop_reason` si viene.
 6. Llama `GET {CHAVEZ_API_URL}/api/v1/sessions/{session_id}/skill-calls?skill=<name>` y setea `pass` desde `called`.
-7. Persiste `completed` + `pass` / `final_text`, o `failed` + `error` (y publica `type=lifecycle`).
+7. Persiste `completed` + `pass` / `final_text` / `stop_reason`, o `failed` + `error` (y publica `type=lifecycle`).
+
+Overlays (chavez canónico):
+
+| Campo | Efecto |
+|-------|--------|
+| `stop_on_skill_call` | Si `true`, chavez corta el loop al detectar `skills_call` (`stop_reason=skill_called`) |
+| `timeout_ms` | Si `>0`, techo del worker **y** deadline en chavez; si `0`/ausente, solo `EVAL_TIMEOUT` del orch |
+
+Cancel: `POST /api/v1/skill-evals/{id}/cancel`.
 
 `provider` opcional: `deepseek` | `cursor` (vacío = `LLM_PROVIDER` del proceso chavez).
 
@@ -161,7 +172,16 @@ Interpretación:
 | `completed` | `false` | Run OK, pero el LLM **no** llamó ese skill (fallo de trigger) |
 | `failed` | — | Error de Lab API, Chavez, timeout, etc. (`error`) |
 
-### WebSocket
+### SSE (UI principal)
+
+```bash
+curl -N -H 'Accept: text/event-stream' \
+  http://127.0.0.1:8082/api/v1/skill-evals/<id>/stream
+```
+
+Frames `event: lifecycle` / `event: agent` con el mismo JSON que el WebSocket. La web-ui usa este path; fallback poll si el stream cae.
+
+### WebSocket (compat)
 
 ```bash
 websocat ws://127.0.0.1:8082/ws/runs/<id>
@@ -171,10 +191,10 @@ Mensajes JSON con `type`:
 
 | `type` | Contenido |
 |--------|-----------|
-| `lifecycle` | `status`: `queued` → `running` → `completed` \| `failed` (`pass` / `final_text` / `error` cuando aplica) |
+| `lifecycle` | `status`: `queued` → `running` → `completed` \| `failed` (`pass` / `final_text` / `error` / `stop_reason` cuando aplica) |
 | `agent` | Stream de chavez: `event` = `text_delta` \| `thinking_delta` \| `tool_call` \| `status` \| `error`; campos `text`, `tool_call`, `status` |
 
-El WS se cierra tras un lifecycle terminal. Si el cliente se conecta tarde y ya hay `chavez_session_id`, el orch hace backfill desde `GET .../events`. El fallback poll HTTP pide lifecycle y, cuando hay session id, también hidrata events (tool_calls mid-run).
+SSE y WS se cierran tras un lifecycle terminal. Si el cliente se conecta tarde y ya hay `chavez_session_id`, el orch hace backfill desde `GET .../events`. El fallback poll HTTP pide lifecycle y, cuando hay session id, también hidrata events (tool_calls mid-run).
 
 ---
 
@@ -206,8 +226,8 @@ Si `completed` + `pass: false` de forma reiterada, ajustar description/task ante
 ## Límites conocidos
 
 - Sin auto-run al crear la skill.
-- El orchestrator persiste `pass` + `final_text` + `chavez_session_id` (este último también mid-run tras SSE `session`); el transcript fino vive en chavez (`sessions` / `run_events`) y se reenvía en vivo por WS (`type=agent`), con backfill/`GET .../events` cuando ya hay session id.
-- Hub WS in-memory (buffer 64; drop si el subscriber va lento); no multi-instancia.
+- El orchestrator persiste `pass` + `final_text` + `chavez_session_id` (este último también mid-run tras SSE `session`); el transcript fino vive en chavez (`sessions` / `run_events`) y se reenvía en vivo por SSE/WS (`type=agent`), con backfill/`GET .../events` cuando ya hay session id.
+- Hub in-memory (buffer 64; drop si el subscriber va lento); no multi-instancia.
 - Create en Lab API exige `content`, no solo name + description.
 - `make bruno` no sustituye una prueba con LLM (el mock sí emite SSE mínimo).
 - Chavez debe tener la API key del provider pedido (ambas keys si se alterna por request).
