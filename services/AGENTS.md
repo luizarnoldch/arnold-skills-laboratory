@@ -6,9 +6,9 @@ Arquitectura **objetivo** de `services/` y razón de existir de cada repo. No es
 
 | Repo | Razón de existir | Hace | No hace |
 |------|------------------|------|---------|
-| [`arnold-laboratory-api`](arnold-laboratory-api/) | Fuente de verdad persistente de skills de laboratorio (CRUD versionado) | HTTP + DB (skills, descriptions, contents) | LLMs, tools externas, loops de agente, evals de ejecución |
+| [`arnold-laboratory-api`](arnold-laboratory-api/) | Fuente de verdad persistente de skills de laboratorio (CRUD versionado) | HTTP + DB (skills, descriptions, contents, trigger queries/metrics, optimize runs) | LLMs, tools externas, loops de agente, ejecución de evals |
 | [`chavez-cli`](chavez-cli/) | Runtime ejecutable: CLI y/o Action API HTTP que corre LLMs y tools | Llamadas a LLM, tools, skills en runtime (incl. `skill_inline`), capas de comportamiento según flags/endpoints | Persistencia canónica del catálogo de skills de laboratorio; historial de evals de lab |
-| [`arnold-lab-orchestrator`](arnold-lab-orchestrator/) | Glue async: setup de versión de skill + eval streaming en chavez + WS lifecycle/agent | Persiste runs `skill_evals`, llama Lab API + Chavez SSE, WebSocket lifecycle + agent frames | Contenido canónico de skills; loop de agente |
+| [`arnold-lab-orchestrator`](arnold-lab-orchestrator/) | Glue async: skill-eval unitario, trigger-eval batches, optimize jobs + WS | Persiste runs locales; llama Lab API (métricas/optimize) + Chavez SSE/Eval; WebSocket lifecycle | Contenido canónico de skills; loop de agente |
 | [`arnold-skills`](arnold-skills/) | Catálogo/orquestación de skills de producto para Cursor/IDE | Contenido de skills y agentes | Backend HTTP, persistencia de lab, runtime de LLM |
 
 ```text
@@ -50,7 +50,7 @@ Objetivo de producto del lab (create skill → eval → verificar `skills_call`)
 
 ## arnold-laboratory-api — solo persistencia
 
-**Contrato:** única responsabilidad = persistencia de datos del laboratorio (skills con descriptions y contents versionados).
+**Contrato:** única responsabilidad = persistencia de datos del laboratorio (skills con descriptions/contents versionados, sets de trigger queries, métricas de eval runs, sesiones de optimize).
 
 - Capa HTTP delgada: handler → service → repository.
 - No ejecutar LLMs, tools externas, tool hooks ni lógica de “stop on skill”.
