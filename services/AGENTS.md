@@ -10,12 +10,14 @@ Arquitectura **objetivo** de `services/` y razón de existir de cada repo. No es
 | [`chavez-cli`](chavez-cli/) | Runtime ejecutable: CLI y/o Action API HTTP que corre LLMs y tools | Llamadas a LLM, tools, skills en runtime (incl. `skill_inline`), capas de comportamiento según flags/endpoints | Persistencia canónica del catálogo de skills de laboratorio; historial de evals de lab |
 | [`arnold-lab-orchestrator`](arnold-lab-orchestrator/) | Glue async: skill-eval unitario, trigger-eval batches, optimize jobs + WS | Persiste runs locales; llama Lab API (métricas/optimize) + Chavez SSE/Eval; WebSocket lifecycle | Contenido canónico de skills; loop de agente |
 | [`arnold-skills`](arnold-skills/) | Catálogo/orquestación de skills de producto para Cursor/IDE | Contenido de skills y agentes | Backend HTTP, persistencia de lab, runtime de LLM |
+| [`skills-lab-mcp`](skills-lab-mcp/) | Fachada MCP stdio (Go) para LLMs externos | Tools: list/get skills, test sets, evals, optimize vía lab-api + orchestrator; binario `skills_lab_mcp` | Persistencia, LLM, agent loop |
 
 ```text
   arnold-skills             → autoría / catálogo Cursor (contenido IDE)
   arnold-laboratory-api     → persistencia versionada de skills de lab (HTTP + DB)
   chavez-cli                → ejecución: LLM + tools + capas por flags/endpoints
   arnold-lab-orchestrator   → orquesta eval async Lab → Chavez + WS
+  skills-lab-mcp            → MCP stdio Go → lab-api + orchestrator
 ```
 
 ```mermaid
@@ -65,7 +67,7 @@ Objetivo de producto del lab (create skill → eval → verificar `skills_call`)
 Activadas por **flags CLI** o **endpoints HTTP**, apilables conceptualmente:
 
 1. **Base — LLM + tools:** loop agente (chat → tools → repeat) y catálogo de tools externas.
-2. **Skill-gate:** si se invoca una skill predefinida (p. ej. vía `skills_call` / política del flag o endpoint), **detener** o cortocircuitar el flujo según el contrato del modo (útil para evals de trigger / laboratorios). Observación vía `POST /api/v1/evals` (soporta `skill_inline`; persiste sesión) y verificación canónica vía `GET /api/v1/sessions/{id}/skill-calls`.
+2. **Skill-gate:** si se invoca una skill predefinida (p. ej. vía `skills_call` / política del flag o endpoint), **detener** o cortocircuitar el flujo según el contrato del modo (útil para evals de trigger / laboratorios). `POST /api/v1/evals` con `eval_mode=trigger` registra el trigger **sin** ejecutar el cuerpo del skill ni `write`/`bash`. Observación vía `skill_inline` + sesión; verificación canónica vía `GET /api/v1/sessions/{id}/skill-calls`.
 3. **Wrap / post-LLM:** lógica encima o alrededor del calling al LLM (hooks, instrumentación, wrappers de eval, persistencia de sesión de runtime).
 
 ```text

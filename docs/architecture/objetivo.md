@@ -4,6 +4,8 @@ Este repositorio es un **laboratorio de skills**: crear una skill versionada (na
 
 El resultado de producto no es solo persistir skills ni correr un chat: es medir el **trigger** — `pass=true` cuando el orquestador confirma vía `GET .../skill-calls` que hubo `skills_call` con el nombre de la skill bajo prueba.
 
+Los evals de laboratorio (skill-eval, trigger-eval batch, baseline, optimize train/validation) son **analysis-only**: no ejecutan el cuerpo del skill ni crean archivos, aunque SKILL.md lo pida. Chavez `eval_mode=trigger` es la garantía.
+
 Roles de cada servicio: [`services/AGENTS.md`](../../services/AGENTS.md). Cómo correr el flujo: [`skill-eval-e2e.md`](skill-eval-e2e.md).
 
 ## Flujo objetivo

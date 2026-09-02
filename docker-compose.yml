@@ -1,0 +1,183 @@
+name: skills-lab
+
+services:
+  lab-api:
+    build:
+      context: .
+      dockerfile: services/arnold-laboratory-api/Dockerfile
+    container_name: skills-lab-api
+    environment:
+      PORT: "18180"
+      APP_ENV: ${APP_ENV:-production}
+      DB_DRIVER: sqlite
+      SQLITE_PATH: /data/lab-skills.db
+    volumes:
+      - lab-api-data:/data
+    networks:
+      - skills-lab
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:18180/ready"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 10s
+    restart: unless-stopped
+
+  chavez:
+    build:
+      context: .
+      dockerfile: services/chavez-cli/Dockerfile
+    container_name: skills-lab-chavez
+    environment:
+      PORT: "18181"
+      APP_ENV: ${APP_ENV:-production}
+      DB_DRIVER: sqlite
+      SQLITE_PATH: /data/chavez.db
+      LLM_PROVIDER: ${LLM_PROVIDER:-deepseek}
+      DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY:-}
+      DEEPSEEK_BASE_URL: ${DEEPSEEK_BASE_URL:-https://api.deepseek.com}
+      DEEPSEEK_MODEL: ${DEEPSEEK_MODEL:-deepseek-v4-flash}
+      CURSOR_API_KEY: ${CURSOR_API_KEY:-}
+      CURSOR_BASE_URL: ${CURSOR_BASE_URL:-https://api.cursor.com}
+      CURSOR_MODEL: ${CURSOR_MODEL:-auto}
+      CHAVEZ_PUBLIC_BASE_URL: ${CHAVEZ_PUBLIC_BASE_URL:-}
+      CHAVEZ_MAX_TURNS: ${CHAVEZ_MAX_TURNS:-40}
+      CHAVEZ_BASH_TIMEOUT_SEC: ${CHAVEZ_BASH_TIMEOUT_SEC:-60}
+      CHAVEZ_MAX_OUTPUT: ${CHAVEZ_MAX_OUTPUT:-100000}
+    volumes:
+      - chavez-data:/data
+      - ${WORKSPACE_HOST_PATH:-./workspace}:/workspace
+    networks:
+      - skills-lab
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:18181/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 10s
+    restart: unless-stopped
+
+  orch:
+    build:
+      context: .
+      dockerfile: services/arnold-lab-orchestrator/Dockerfile
+    container_name: skills-lab-orch
+    environment:
+      PORT: "18182"
+      APP_ENV: ${APP_ENV:-production}
+      DB_DRIVER: sqlite
+      SQLITE_PATH: /data/lab-orchestrator.db
+      LAB_API_URL: http://lab-api:18180
+      CHAVEZ_API_URL: http://chavez:18181
+      WORKSPACE_DEFAULT: /workspace
+      EVAL_TIMEOUT: ${EVAL_TIMEOUT:-5m}
+    volumes:
+      - orch-data:/data
+    depends_on:
+      lab-api:
+        condition: service_healthy
+      chavez:
+        condition: service_healthy
+    networks:
+      - skills-lab
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:18182/ready"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 15s
+    restart: unless-stopped
+
+  web-ui:
+    build:
+      context: .
+      dockerfile: services/web-ui/Dockerfile
+    container_name: skills-lab-web-ui
+    environment:
+      HOST: 0.0.0.0
+      PORT: "4321"
+      NODE_ENV: production
+      LAB_API_PROXY_TARGET: http://lab-api:18180
+      ORCH_PROXY_TARGET: http://orch:18182
+      CHAVEZ_PROXY_TARGET: http://chavez:18181
+      PUBLIC_LAB_API_BASE: /lab-api
+      PUBLIC_ORCH_BASE: /orch
+      PUBLIC_CHAVEZ_BASE: /chavez
+    depends_on:
+      lab-api:
+        condition: service_healthy
+      chavez:
+        condition: service_healthy
+      orch:
+        condition: service_healthy
+    networks:
+      - skills-lab
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:4321/"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 20s
+    restart: unless-stopped
+
+  skills-lab-mcp:
+    build:
+      context: .
+      dockerfile: services/skills-lab-mcp/Dockerfile
+    container_name: skills-lab-mcp
+    environment:
+      LAB_API_URL: http://lab-api:18180
+      ORCH_API_URL: http://orch:18182
+      WORKSPACE_DEFAULT: /workspace
+      HTTP_TIMEOUT: ${MCP_HTTP_TIMEOUT:-30s}
+    depends_on:
+      lab-api:
+        condition: service_healthy
+      orch:
+        condition: service_healthy
+    networks:
+      - skills-lab
+    healthcheck:
+      test: ["CMD", "test", "-x", "/app/skills_lab_mcp"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+    restart: unless-stopped
+    stdin_open: true
+    tty: false
+
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: skills-lab-nginx
+    ports:
+      - "18321:18321"
+    volumes:
+      - ./deploy/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      web-ui:
+        condition: service_healthy
+      lab-api:
+        condition: service_healthy
+      chavez:
+        condition: service_healthy
+      orch:
+        condition: service_healthy
+    networks:
+      - skills-lab
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:18321/"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 10s
+    restart: unless-stopped
+
+networks:
+  skills-lab:
+    driver: bridge
+
+volumes:
+  lab-api-data:
+  orch-data:
+  chavez-data:
